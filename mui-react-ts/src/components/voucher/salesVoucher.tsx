@@ -5,9 +5,7 @@ import {
   Typography,
   TextField,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
+
   Table,
   TableBody,
   TableCell,
@@ -16,6 +14,7 @@ import {
   TableRow,
   Card,
   IconButton,
+  Autocomplete,
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
@@ -58,8 +57,27 @@ const SalesVoucher: React.FC = () => {
     "Furniture",
   ]);
 
-  // State for voucher details
+  // State for voucher details - store in yyyy-mm-dd format for date input
   const [voucherDate, setVoucherDate] = useState("");
+
+  // Helper function to format date to dd/mm/yyyy for display
+  const formatDateToDisplay = (dateString: string): string => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Get today's date in yyyy-mm-dd format for default
+  const getTodayDate = (): string => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   const [selectedParty, setSelectedParty] = useState("");
   const [carton, setCarton] = useState("");
   const [closingBalance, setClosingBalance] = useState("");
@@ -168,7 +186,7 @@ const SalesVoucher: React.FC = () => {
 
     // Here you would typically send the data to your backend
     const voucherData = {
-      date: voucherDate,
+      date: formatDateToDisplay(voucherDate), // Convert to dd/mm/yyyy for display/storage
       party: selectedParty,
       carton: carton,
       closingBalance: closingBalance,
@@ -201,24 +219,27 @@ const SalesVoucher: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        mx: "auto",
-        overflow: 'hidden'
-      }}
-    >
+    <Box sx={{
+      width: { xs: '100%', md: '100vw' },
+      position: { xs: 'static', md: 'relative' },
+      left: { xs: 'auto', md: '50%' },
+      right: { xs: 'auto', md: '50%' },
+      marginLeft: { xs: '0', md: 'calc(-50vw + 20vw)' },
+      marginRight: { xs: '0', md: '-50vw' },
+      py: { xs: 2, md: 4 },
+      px: { xs: 2, md: 6 },
+      minHeight: '100vh',
+      backgroundColor: '#D9E1FA'
+    }}>
       {/* Main Content Container */}
       <Box sx={{ width: '100%', mx: 'auto' }}>
-        <Paper
-          elevation={3}
-          sx={{
-            p: { xs: 2, sm: 2, md: 3 },
-            m: 0,
-            borderRadius: 0,
-            width: '100%'
-          }}
-        >
+        <Paper elevation={3} sx={{
+          p: { xs: 2, md: 3 },
+          mb: { xs: 2, md: 3 },
+          borderRadius: { xs: 1, md: 2 },
+          mx: { xs: 0, md: 0 },
+          width: '100%'
+        }}>
         {/* Header */}
         <Box
           sx={{
@@ -264,28 +285,50 @@ const SalesVoucher: React.FC = () => {
                 value={voucherDate}
                 onChange={(e) => setVoucherDate(e.target.value)}
                 variant="outlined"
+                slotProps={{
+                  htmlInput: {
+                    max: "2099-12-31"
+                  }
+                }}
               />
             </Box>
             <Box>
               <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
                 Party
               </Typography>
-              <FormControl fullWidth size="small">
-                <Select
-                  value={selectedParty}
-                  onChange={(e) => setSelectedParty(e.target.value)}
-                  displayEmpty
-                >
-                  <MenuItem value="">
-                    <em>Select Party</em>
-                  </MenuItem>
-                  {parties.map((party) => (
-                    <MenuItem key={party.id} value={party.name}>
-                      {party.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                size="small"
+                options={parties}
+                getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
+                value={parties.find(party => party.name === selectedParty) || null}
+                onChange={(_, newValue) => {
+                  if (typeof newValue === 'string') {
+                    setSelectedParty(newValue);
+                  } else if (newValue) {
+                    setSelectedParty(newValue.name);
+                  } else {
+                    setSelectedParty('');
+                  }
+                }}
+                inputValue={selectedParty}
+                onInputChange={(_, newInputValue) => {
+                  setSelectedParty(newInputValue);
+                }}
+                freeSolo={true}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Select or type party name"
+                    variant="outlined"
+                  />
+                )}
+                filterOptions={(options, { inputValue }) => {
+                  const filtered = options.filter((option) =>
+                    option.name.toLowerCase().includes(inputValue.toLowerCase())
+                  );
+                  return filtered;
+                }}
+              />
             </Box>
             <Box>
               <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
@@ -342,29 +385,33 @@ const SalesVoucher: React.FC = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
                   <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Item</Typography>
-                  {index === 0 ? (
-                    <FormControl fullWidth size="small">
-                      <Select
-                        value={item.item}
-                        onChange={(e) => handleInputChange(item.id, "item", e.target.value)}
-                        displayEmpty
-                      >
-                        <MenuItem value=""><em>Item</em></MenuItem>
-                        <MenuItem value="Shirt">Shirt</MenuItem>
-                        <MenuItem value="Pants">Pants</MenuItem>
-                        <MenuItem value="Jacket">Jacket</MenuItem>
-                        <MenuItem value="Shoes">Shoes</MenuItem>
-                      </Select>
-                    </FormControl>
-                  ) : (
-                    <TextField
-                      fullWidth
-                      size="small"
-                      value={item.item}
-                      onChange={(e) => handleInputChange(item.id, "item", e.target.value)}
-                      placeholder="Enter item"
-                    />
-                  )}
+                  <Autocomplete
+                    size="small"
+                    options={['Shirt', 'Pants', 'Jacket', 'Shoes', 'T-Shirt', 'Jeans', 'Dress', 'Sweater']}
+                    getOptionLabel={(option) => option}
+                    value={item.item || null}
+                    onChange={(_, newValue) => {
+                      handleInputChange(item.id, "item", newValue || '');
+                    }}
+                    inputValue={item.item}
+                    onInputChange={(_, newInputValue) => {
+                      handleInputChange(item.id, "item", newInputValue);
+                    }}
+                    freeSolo={true}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Select or type item name"
+                        variant="outlined"
+                      />
+                    )}
+                    filterOptions={(options, { inputValue }) => {
+                      const filtered = options.filter((option) =>
+                        option.toLowerCase().includes(inputValue.toLowerCase())
+                      );
+                      return filtered;
+                    }}
+                  />
                 </Box>
 
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
@@ -406,20 +453,33 @@ const SalesVoucher: React.FC = () => {
 
                 <Box>
                   <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Category</Typography>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={item.category}
-                      onChange={(e) => handleInputChange(item.id, "category", e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value=""><em>Select category</em></MenuItem>
-                      {categories.map((category) => (
-                        <MenuItem key={category} value={category}>
-                          {category}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <Autocomplete
+                    size="small"
+                    options={categories}
+                    getOptionLabel={(option) => option}
+                    value={item.category || null}
+                    onChange={(_, newValue) => {
+                      handleInputChange(item.id, "category", newValue || '');
+                    }}
+                    inputValue={item.category}
+                    onInputChange={(_, newInputValue) => {
+                      handleInputChange(item.id, "category", newInputValue);
+                    }}
+                    freeSolo={true}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Select or type category"
+                        variant="outlined"
+                      />
+                    )}
+                    filterOptions={(options, { inputValue }) => {
+                      const filtered = options.filter((option) =>
+                        option.toLowerCase().includes(inputValue.toLowerCase())
+                      );
+                      return filtered;
+                    }}
+                  />
                 </Box>
 
                 <Box>
@@ -506,42 +566,42 @@ const SalesVoucher: React.FC = () => {
                 <TableCell sx={{ fontWeight: "bold", minWidth: 140, p: 2 }}>
                   Total
                 </TableCell>
+                <TableCell sx={{ fontWeight: "bold", minWidth: 100, p: 2 }}>
+                  ACTIONS
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {salesItems.map((item, index) => (
+              {salesItems.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell sx={{ p: 2 }}>
-                    {index === 0 ? (
-                      <FormControl fullWidth size="small">
-                        <Select
-                          value={item.item}
-                          onChange={(e) =>
-                            handleInputChange(item.id, "item", e.target.value)
-                          }
-                          displayEmpty
-                        >
-                          <MenuItem value="">
-                            <em>Item</em>
-                          </MenuItem>
-                          <MenuItem value="Shirt">Shirt</MenuItem>
-                          <MenuItem value="Pants">Pants</MenuItem>
-                          <MenuItem value="Jacket">Jacket</MenuItem>
-                          <MenuItem value="Shoes">Shoes</MenuItem>
-                        </Select>
-                      </FormControl>
-                    ) : (
-                      <TextField
-                        fullWidth
-                        size="small"
-                        value={item.item}
-                        onChange={(e) =>
-                          handleInputChange(item.id, "item", e.target.value)
-                        }
-                        placeholder="Enter item"
-                        variant="outlined"
-                      />
-                    )}
+                    <Autocomplete
+                      size="small"
+                      options={['Shirt', 'Pants', 'Jacket', 'Shoes', 'T-Shirt', 'Jeans', 'Dress', 'Sweater']}
+                      getOptionLabel={(option) => option}
+                      value={item.item || null}
+                      onChange={(_, newValue) => {
+                        handleInputChange(item.id, "item", newValue || '');
+                      }}
+                      inputValue={item.item}
+                      onInputChange={(_, newInputValue) => {
+                        handleInputChange(item.id, "item", newInputValue);
+                      }}
+                      freeSolo={true}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select or type item"
+                          variant="outlined"
+                        />
+                      )}
+                      filterOptions={(options, { inputValue }) => {
+                        const filtered = options.filter((option) =>
+                          option.toLowerCase().includes(inputValue.toLowerCase())
+                        );
+                        return filtered;
+                      }}
+                    />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
                     <TextField
@@ -595,24 +655,33 @@ const SalesVoucher: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
-                    <FormControl fullWidth size="small">
-                      <Select
-                        value={item.category}
-                        onChange={(e) =>
-                          handleInputChange(item.id, "category", e.target.value)
-                        }
-                        displayEmpty
-                      >
-                        <MenuItem value="">
-                          <em>Select category</em>
-                        </MenuItem>
-                        {categories.map((category) => (
-                          <MenuItem key={category} value={category}>
-                            {category}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <Autocomplete
+                      size="small"
+                      options={categories}
+                      getOptionLabel={(option) => option}
+                      value={item.category || null}
+                      onChange={(_, newValue) => {
+                        handleInputChange(item.id, "category", newValue || '');
+                      }}
+                      inputValue={item.category}
+                      onInputChange={(_, newInputValue) => {
+                        handleInputChange(item.id, "category", newInputValue);
+                      }}
+                      freeSolo={true}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select or type category"
+                          variant="outlined"
+                        />
+                      )}
+                      filterOptions={(options, { inputValue }) => {
+                        const filtered = options.filter((option) =>
+                          option.toLowerCase().includes(inputValue.toLowerCase())
+                        );
+                        return filtered;
+                      }}
+                    />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
                     <TextField
@@ -673,6 +742,24 @@ const SalesVoucher: React.FC = () => {
                         },
                       }}
                     />
+                  </TableCell>
+                  <TableCell sx={{ p: 2 }}>
+                    {salesItems.length > 1 && (
+                      <IconButton
+                        color="error"
+                        onClick={() => {
+                          setSalesItems(salesItems.filter(i => i.id !== item.id));
+                        }}
+                        size="small"
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "#ffebee",
+                          },
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

@@ -57,7 +57,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 const FloatingMenuButton = styled(Fab)(() => ({
   position: 'fixed',
-  top: '80px',
+  top: '20px',
   left: '20px',
   backgroundColor: '#D9E1FA',
   color: '#ffffff',

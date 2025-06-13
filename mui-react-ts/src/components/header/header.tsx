@@ -9,11 +9,23 @@ import {
   Box,
   IconButton,
   Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Collapse,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   Language as LanguageIcon,
   AccountCircle as AccountCircleIcon,
+  Menu as MenuIcon,
+  ExpandLess,
+  ExpandMore,
+  ShoppingCart,
+  Assignment,
+  Inventory,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 
@@ -25,10 +37,13 @@ const StyledAppBar = styled(AppBar)(() => ({
   borderBottom: '1px solid #B8C5F2',
 }));
 
-const LogoContainer = styled(Box)(() => ({
+const LogoContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   marginRight: '32px',
+  [theme.breakpoints.down('md')]: {
+    marginRight: '16px',
+  },
 }));
 
 const NavButton = styled(Button)(() => ({
@@ -71,6 +86,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
   const [inventoryAnchorEl, setInventoryAnchorEl] = useState<null | HTMLElement>(null);
   const [languageAnchorEl, setLanguageAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [inventoryExpanded, setInventoryExpanded] = useState(false);
 
   // Inventory dropdown items
   const inventoryItems = [
@@ -117,18 +134,51 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     handleLanguageClose();
   };
 
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleMobileMenuClose = () => {
+    setMobileMenuOpen(false);
+  };
+
+  const handleMobileNavigation = (section: string) => {
+    onNavigate(section);
+    handleMobileMenuClose();
+  };
+
+  const handleInventoryToggle = () => {
+    setInventoryExpanded(!inventoryExpanded);
+  };
+
   return (
     <StyledAppBar position="static">
-      <Toolbar sx={{ px: 3 }}>
+      <Toolbar sx={{ px: { xs: 1, md: 3 } }}>
+        {/* Mobile Menu Button */}
+        <IconButton
+          edge="start"
+          color="inherit"
+          aria-label="menu"
+          onClick={handleMobileMenuToggle}
+          sx={{
+            mr: 2,
+            display: { xs: 'flex', md: 'none' },
+            color: '#333'
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+
         {/* Logo Section */}
-        <LogoContainer>
-          <img
+        <LogoContainer sx={{ mr: { xs: 1, md: 4 } }}>
+          <Box
+            component="img"
             src="/image.png"
             alt="Company Logo"
-            style={{
-              width: '60px',
-              height: '40px',
-              marginRight: '16px',
+            sx={{
+              width: { xs: '40px', md: '60px' },
+              height: { xs: '30px', md: '40px' },
+              mr: { xs: 1, md: 2 },
               objectFit: 'contain',
             }}
           />
@@ -279,6 +329,155 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
           </Box>
         </RightSection>
       </Toolbar>
+
+      {/* Mobile Navigation Drawer */}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={handleMobileMenuClose}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+            backgroundColor: '#ffffff',
+            pt: 2,
+          },
+        }}
+      >
+        <List>
+          {/* Purchase Voucher */}
+          <ListItem
+            onClick={() => handleMobileNavigation('purchase-voucher')}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { backgroundColor: '#f8f9ff' }
+            }}
+          >
+            <ListItemIcon>
+              <ShoppingCart sx={{ color: '#333' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Purchase Voucher"
+              sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
+            />
+          </ListItem>
+
+          {/* Purchase Return */}
+          <ListItem
+            onClick={() => handleMobileNavigation('purchase-return')}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { backgroundColor: '#f8f9ff' }
+            }}
+          >
+            <ListItemIcon>
+              <Assignment sx={{ color: '#333' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Purchase Return"
+              sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
+            />
+          </ListItem>
+
+          {/* Sales Voucher */}
+          <ListItem
+            onClick={() => handleMobileNavigation('sales-voucher')}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { backgroundColor: '#f8f9ff' }
+            }}
+          >
+            <ListItemIcon>
+              <ShoppingCart sx={{ color: '#333' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Sales Voucher"
+              sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
+            />
+          </ListItem>
+
+          {/* Sales Return */}
+          <ListItem
+            onClick={() => handleMobileNavigation('sales-return')}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { backgroundColor: '#f8f9ff' }
+            }}
+          >
+            <ListItemIcon>
+              <Assignment sx={{ color: '#333' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Sales Return"
+              sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
+            />
+          </ListItem>
+
+          {/* Inventory Section */}
+          <ListItem
+            onClick={handleInventoryToggle}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { backgroundColor: '#f8f9ff' }
+            }}
+          >
+            <ListItemIcon>
+              <Inventory sx={{ color: '#333' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Inventory"
+              sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
+            />
+            {inventoryExpanded ? <ExpandLess /> : <ExpandMore />}
+          </ListItem>
+
+          {/* Inventory Submenu */}
+          <Collapse in={inventoryExpanded} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {inventoryItems.map((item) => (
+                <ListItem
+                  key={item.id}
+                  onClick={() => handleMobileNavigation(item.id)}
+                  sx={{
+                    pl: 4,
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: '#f8f9ff' }
+                  }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontSize: '0.9rem',
+                        fontWeight: 400
+                      }
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
+
+          <Divider sx={{ my: 1 }} />
+
+          {/* Language Selection */}
+          <ListItem
+            onClick={handleLanguageClick}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { backgroundColor: '#f8f9ff' }
+            }}
+          >
+            <ListItemIcon>
+              <LanguageIcon sx={{ color: '#333' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Language"
+              sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
+            />
+          </ListItem>
+        </List>
+      </Drawer>
     </StyledAppBar>
   );
 };

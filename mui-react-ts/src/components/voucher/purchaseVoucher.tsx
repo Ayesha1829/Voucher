@@ -5,17 +5,17 @@ import {
   Typography,
   TextField,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Card,
+  IconButton,
+  Autocomplete,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
 // Define interfaces for type safety
 interface PurchaseItem {
@@ -63,8 +63,18 @@ const PurchaseVoucher: React.FC = () => {
     "Boxes",
   ]);
 
-  // State for voucher details
+  // State for voucher details - store in yyyy-mm-dd format for date input
   const [voucherDate, setVoucherDate] = useState("");
+
+  // Helper function to format date to dd/mm/yyyy for display
+  const formatDateToDisplay = (dateString: string): string => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
   const [selectedSupplier, setSelectedSupplier] = useState("");
   const [closingBalance, setClosingBalance] = useState("");
 
@@ -162,7 +172,7 @@ const PurchaseVoucher: React.FC = () => {
 
     // Here you would typically send the data to your backend
     const voucherData = {
-      date: voucherDate,
+      date: formatDateToDisplay(voucherDate), // Convert to dd/mm/yyyy for display/storage
       supplier: selectedSupplier,
       closingBalance: closingBalance,
       items: purchaseItems,
@@ -191,49 +201,63 @@ const PurchaseVoucher: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "#D9E1FA",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        p: 0,
-        pl: 0,
-      }}
-    >
-      <Paper
-        elevation={3}
-        sx={{
-          p: 4,
-          width: "100%",
-          maxWidth: 1600,
-          ml: 2,
-          my: 2,
-        }}
-      >
+    <Box sx={{
+      width: { xs: '100%', md: '100vw' },
+      position: { xs: 'static', md: 'relative' },
+      left: { xs: 'auto', md: '50%' },
+      right: { xs: 'auto', md: '50%' },
+      marginLeft: { xs: '0', md: 'calc(-50vw + 20vw)' },
+      marginRight: { xs: '0', md: '-50vw' },
+      py: { xs: 2, md: 4 },
+      px: { xs: 2, md: 6 },
+      minHeight: '100vh',
+      backgroundColor: '#D9E1FA'
+    }}>
+      {/* Main Content Container */}
+      <Box sx={{ width: '100%', mx: 'auto' }}>
+        <Paper elevation={3} sx={{
+          p: { xs: 2, md: 3 },
+          mb: { xs: 2, md: 3 },
+          borderRadius: { xs: 1, md: 2 },
+          mx: { xs: 0, md: 0 },
+          width: '100%'
+        }}>
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#4fc3f7",
-            color: "white",
-            py: 2,
-            px: 3,
+            backgroundColor: "#D9E1FA",
+            color: "black",
+            py: { xs: 1.5, md: 2 },
+            px: { xs: 2, md: 3 },
             borderRadius: 1,
-            mb: 3,
+            mb: { xs: 2, md: 3 },
             textAlign: "center",
           }}
         >
-          <Typography variant="h4" component="h1" fontWeight="bold">
+          <Typography
+            variant="h4"
+            component="h1"
+            fontWeight="bold"
+            sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}
+          >
             Purchase Voucher
           </Typography>
         </Box>
 
         {/* Voucher Details Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: "flex", gap: 3, mb: 2, flexWrap: "wrap" }}>
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+        <Box sx={{ mb: { xs: 2, md: 3 } }}>
+          <Box sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: '1fr 1fr',
+              md: '1fr 1fr 1fr'
+            },
+            gap: { xs: 2, md: 3 },
+            mb: 2
+          }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
                 Date
               </Typography>
               <TextField
@@ -243,31 +267,53 @@ const PurchaseVoucher: React.FC = () => {
                 value={voucherDate}
                 onChange={(e) => setVoucherDate(e.target.value)}
                 variant="outlined"
+                slotProps={{
+                  htmlInput: {
+                    max: "2099-12-31"
+                  }
+                }}
               />
             </Box>
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
                 Supplier
               </Typography>
-              <FormControl fullWidth size="small">
-                <Select
-                  value={selectedSupplier}
-                  onChange={(e) => setSelectedSupplier(e.target.value)}
-                  displayEmpty
-                >
-                  <MenuItem value="">
-                    <em>Select Supplier</em>
-                  </MenuItem>
-                  {suppliers.map((supplier) => (
-                    <MenuItem key={supplier.id} value={supplier.name}>
-                      {supplier.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                size="small"
+                options={suppliers}
+                getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
+                value={suppliers.find(supplier => supplier.name === selectedSupplier) || null}
+                onChange={(_, newValue) => {
+                  if (typeof newValue === 'string') {
+                    setSelectedSupplier(newValue);
+                  } else if (newValue) {
+                    setSelectedSupplier(newValue.name);
+                  } else {
+                    setSelectedSupplier('');
+                  }
+                }}
+                inputValue={selectedSupplier}
+                onInputChange={(_, newInputValue) => {
+                  setSelectedSupplier(newInputValue);
+                }}
+                freeSolo={true}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Select or type supplier name"
+                    variant="outlined"
+                  />
+                )}
+                filterOptions={(options, { inputValue }) => {
+                  const filtered = options.filter((option) =>
+                    option.name.toLowerCase().includes(inputValue.toLowerCase())
+                  );
+                  return filtered;
+                }}
+              />
             </Box>
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
+            <Box>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
                 Closing balance
               </Typography>
               <TextField
@@ -283,13 +329,178 @@ const PurchaseVoucher: React.FC = () => {
           </Box>
         </Box>
 
-        {/* Items Table */}
-        <TableContainer
-          component={Paper}
-          variant="outlined"
-          sx={{ mb: 3, width: "100%" }}
-        >
-          <Table sx={{ minWidth: 1200 }}>
+        {/* Items - Mobile Card Layout */}
+        <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 3 }}>
+          {purchaseItems.map((item, index) => (
+            <Card key={item.id} sx={{ mb: 2, p: 2, borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>
+                  Item #{index + 1}
+                </Typography>
+                {purchaseItems.length > 1 && (
+                  <IconButton
+                    color="error"
+                    onClick={() => {
+                      setPurchaseItems(purchaseItems.filter(i => i.id !== item.id));
+                    }}
+                    size="small"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
+              </Box>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Item</Typography>
+                  <Autocomplete
+                    size="small"
+                    options={['Laptop', 'Mouse', 'Keyboard', 'Monitor', 'Printer', 'Scanner', 'Tablet', 'Phone']}
+                    getOptionLabel={(option) => option}
+                    value={item.item || null}
+                    onChange={(_, newValue) => {
+                      handleInputChange(item.id, "item", newValue || '');
+                    }}
+                    inputValue={item.item}
+                    onInputChange={(_, newInputValue) => {
+                      handleInputChange(item.id, "item", newInputValue);
+                    }}
+                    freeSolo={true}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Select or type item name"
+                        variant="outlined"
+                      />
+                    )}
+                    filterOptions={(options, { inputValue }) => {
+                      const filtered = options.filter((option) =>
+                        option.toLowerCase().includes(inputValue.toLowerCase())
+                      );
+                      return filtered;
+                    }}
+                  />
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Category</Typography>
+                  <Autocomplete
+                    size="small"
+                    options={categories}
+                    getOptionLabel={(option) => option}
+                    value={item.category || null}
+                    onChange={(_, newValue) => {
+                      handleInputChange(item.id, "category", newValue || '');
+                    }}
+                    inputValue={item.category}
+                    onInputChange={(_, newInputValue) => {
+                      handleInputChange(item.id, "category", newInputValue);
+                    }}
+                    freeSolo={true}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Select or type category"
+                        variant="outlined"
+                      />
+                    )}
+                    filterOptions={(options, { inputValue }) => {
+                      const filtered = options.filter((option) =>
+                        option.toLowerCase().includes(inputValue.toLowerCase())
+                      );
+                      return filtered;
+                    }}
+                  />
+                </Box>
+
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Rate</Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.rate || ""}
+                      onChange={(e) => handleInputChange(item.id, "rate", Number(e.target.value))}
+                      placeholder="0.00"
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Quantity</Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.quantity || ""}
+                      onChange={(e) => handleInputChange(item.id, "quantity", Number(e.target.value))}
+                      placeholder="0"
+                    />
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Unit</Typography>
+                    <Autocomplete
+                      size="small"
+                      options={units}
+                      getOptionLabel={(option) => option}
+                      value={item.unit || null}
+                      onChange={(_, newValue) => {
+                        handleInputChange(item.id, "unit", newValue || '');
+                      }}
+                      inputValue={item.unit}
+                      onInputChange={(_, newInputValue) => {
+                        handleInputChange(item.id, "unit", newInputValue);
+                      }}
+                      freeSolo={true}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select or type unit"
+                          variant="outlined"
+                        />
+                      )}
+                      filterOptions={(options, { inputValue }) => {
+                        const filtered = options.filter((option) =>
+                          option.toLowerCase().includes(inputValue.toLowerCase())
+                        );
+                        return filtered;
+                      }}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>GST (%)</Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.gst || ""}
+                      onChange={(e) => handleInputChange(item.id, "gst", Number(e.target.value))}
+                      placeholder="0"
+                    />
+                  </Box>
+                </Box>
+
+                <Box sx={{ p: 1, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Total</Typography>
+                  <Typography variant="h6" color="success.main" fontWeight="bold">
+                    ${item.total.toFixed(2)}
+                  </Typography>
+                </Box>
+              </Box>
+            </Card>
+          ))}
+        </Box>
+
+        {/* Items Table - Desktop Layout */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <TableContainer
+            component={Paper}
+            variant="outlined"
+            sx={{ mb: 3, width: "100%" }}
+          >
+            <Table sx={{ minWidth: 1200 }}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell sx={{ fontWeight: "bold", minWidth: 200, p: 2 }}>
@@ -313,62 +524,71 @@ const PurchaseVoucher: React.FC = () => {
                 <TableCell sx={{ fontWeight: "bold", minWidth: 150, p: 2 }}>
                   TOTAL
                 </TableCell>
+                <TableCell sx={{ fontWeight: "bold", minWidth: 100, p: 2 }}>
+                  ACTIONS
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {purchaseItems.map((item, index) => (
+              {purchaseItems.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell sx={{ p: 2 }}>
-                    {index === 0 ? (
-                      <FormControl fullWidth size="small">
-                        <Select
-                          value={item.item}
-                          onChange={(e) =>
-                            handleInputChange(item.id, "item", e.target.value)
-                          }
-                          displayEmpty
-                        >
-                          <MenuItem value="">
-                            <em>Item</em>
-                          </MenuItem>
-                          <MenuItem value="Laptop">Laptop</MenuItem>
-                          <MenuItem value="Mouse">Mouse</MenuItem>
-                          <MenuItem value="Keyboard">Keyboard</MenuItem>
-                          <MenuItem value="Monitor">Monitor</MenuItem>
-                        </Select>
-                      </FormControl>
-                    ) : (
-                      <TextField
-                        fullWidth
-                        size="small"
-                        value={item.item}
-                        onChange={(e) =>
-                          handleInputChange(item.id, "item", e.target.value)
-                        }
-                        placeholder="Enter item"
-                        variant="outlined"
-                      />
-                    )}
+                    <Autocomplete
+                      size="small"
+                      options={['Laptop', 'Mouse', 'Keyboard', 'Monitor', 'Printer', 'Scanner', 'Tablet', 'Phone']}
+                      getOptionLabel={(option) => option}
+                      value={item.item || null}
+                      onChange={(_, newValue) => {
+                        handleInputChange(item.id, "item", newValue || '');
+                      }}
+                      inputValue={item.item}
+                      onInputChange={(_, newInputValue) => {
+                        handleInputChange(item.id, "item", newInputValue);
+                      }}
+                      freeSolo={true}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select or type item"
+                          variant="outlined"
+                        />
+                      )}
+                      filterOptions={(options, { inputValue }) => {
+                        const filtered = options.filter((option) =>
+                          option.toLowerCase().includes(inputValue.toLowerCase())
+                        );
+                        return filtered;
+                      }}
+                    />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
-                    <FormControl fullWidth size="small">
-                      <Select
-                        value={item.category}
-                        onChange={(e) =>
-                          handleInputChange(item.id, "category", e.target.value)
-                        }
-                        displayEmpty
-                      >
-                        <MenuItem value="">
-                          <em>Select category</em>
-                        </MenuItem>
-                        {categories.map((category) => (
-                          <MenuItem key={category} value={category}>
-                            {category}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <Autocomplete
+                      size="small"
+                      options={categories}
+                      getOptionLabel={(option) => option}
+                      value={item.category || null}
+                      onChange={(_, newValue) => {
+                        handleInputChange(item.id, "category", newValue || '');
+                      }}
+                      inputValue={item.category}
+                      onInputChange={(_, newInputValue) => {
+                        handleInputChange(item.id, "category", newInputValue);
+                      }}
+                      freeSolo={true}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select or type category"
+                          variant="outlined"
+                        />
+                      )}
+                      filterOptions={(options, { inputValue }) => {
+                        const filtered = options.filter((option) =>
+                          option.toLowerCase().includes(inputValue.toLowerCase())
+                        );
+                        return filtered;
+                      }}
+                    />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
                     <TextField
@@ -405,24 +625,33 @@ const PurchaseVoucher: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
-                    <FormControl fullWidth size="small">
-                      <Select
-                        value={item.unit}
-                        onChange={(e) =>
-                          handleInputChange(item.id, "unit", e.target.value)
-                        }
-                        displayEmpty
-                      >
-                        <MenuItem value="">
-                          <em>Select unit</em>
-                        </MenuItem>
-                        {units.map((unit) => (
-                          <MenuItem key={unit} value={unit}>
-                            {unit}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <Autocomplete
+                      size="small"
+                      options={units}
+                      getOptionLabel={(option) => option}
+                      value={item.unit || null}
+                      onChange={(_, newValue) => {
+                        handleInputChange(item.id, "unit", newValue || '');
+                      }}
+                      inputValue={item.unit}
+                      onInputChange={(_, newInputValue) => {
+                        handleInputChange(item.id, "unit", newInputValue);
+                      }}
+                      freeSolo={true}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select or type unit"
+                          variant="outlined"
+                        />
+                      )}
+                      filterOptions={(options, { inputValue }) => {
+                        const filtered = options.filter((option) =>
+                          option.toLowerCase().includes(inputValue.toLowerCase())
+                        );
+                        return filtered;
+                      }}
+                    />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
                     <TextField
@@ -455,14 +684,37 @@ const PurchaseVoucher: React.FC = () => {
                       }}
                     />
                   </TableCell>
+                  <TableCell sx={{ p: 2 }}>
+                    {purchaseItems.length > 1 && (
+                      <IconButton
+                        color="error"
+                        onClick={() => {
+                          setPurchaseItems(purchaseItems.filter(i => i.id !== item.id));
+                        }}
+                        size="small"
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "#ffebee",
+                          },
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+        </Box>
 
         {/* Add Row Button */}
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+        <Box sx={{
+          display: "flex",
+          justifyContent: { xs: "center", md: "flex-end" },
+          mb: { xs: 2, md: 3 }
+        }}>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -472,6 +724,11 @@ const PurchaseVoucher: React.FC = () => {
               "&:hover": {
                 backgroundColor: "#29b6f6",
               },
+              px: { xs: 3, md: 4 },
+              py: { xs: 1, md: 1.5 },
+              fontSize: { xs: '0.9rem', md: '1rem' },
+              width: { xs: '100%', sm: 'auto' },
+              maxWidth: { xs: '300px', sm: 'none' }
             }}
           >
             Add Row
@@ -479,7 +736,11 @@ const PurchaseVoucher: React.FC = () => {
         </Box>
 
         {/* Save Button */}
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{
+          display: "flex",
+          justifyContent: "center",
+          mb: { xs: 2, md: 0 }
+        }}>
           <Button
             variant="contained"
             onClick={handleSave}
@@ -488,17 +749,20 @@ const PurchaseVoucher: React.FC = () => {
               "&:hover": {
                 backgroundColor: "#45a049",
               },
-              px: 4,
-              py: 1,
-              fontSize: "1.1rem",
+              px: { xs: 3, md: 4 },
+              py: { xs: 1.5, md: 1 },
+              fontSize: { xs: '1rem', md: '1.1rem' },
+              width: { xs: '100%', sm: 'auto' },
+              maxWidth: { xs: '300px', sm: 'none' }
             }}
           >
             SAVE
           </Button>
         </Box>
       </Paper>
+      </Box>
     </Box>
   );
 };
 
-export default PurchaseVoucher
+export default PurchaseVoucher;

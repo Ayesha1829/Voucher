@@ -43,9 +43,12 @@ const StyledDrawer = styled(Drawer)(() => ({
     boxSizing: 'border-box',
     backgroundColor: '#ffffff',
     borderRight: '2px solid #D9E1FA',
-    top: '64px', // Position below header
-    height: 'calc(100vh - 64px)', // Adjust height for header
-    zIndex: 1300, // Higher z-index to overlay content
+    top: 0, // Position from the very top
+    height: '100vh', // Full viewport height
+    zIndex: 1400, // Higher z-index to overlay header and content
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden', // Prevent overall scrolling
   },
 }));
 
@@ -54,12 +57,42 @@ const SidebarHeader = styled(Box)(() => ({
   padding: '20px 16px',
   textAlign: 'center',
   borderBottom: '2px solid #B8C5F2',
+  flexShrink: 0, // Don't shrink the header
 }));
 
 const SearchContainer = styled(Box)(() => ({
   padding: '16px',
   backgroundColor: '#ffffff',
   borderBottom: '1px solid #e0e0e0',
+  flexShrink: 0, // Don't shrink the search container
+}));
+
+const ScrollableMenuContainer = styled(Box)(() => ({
+  flex: 1,
+  overflowY: 'auto',
+  overflowX: 'hidden',
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-track': {
+    backgroundColor: '#f1f1f1',
+    borderRadius: '3px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: '#D9E1FA',
+    borderRadius: '3px',
+    '&:hover': {
+      backgroundColor: '#B8C5F2',
+    },
+  },
+}));
+
+const SidebarFooter = styled(Box)(() => ({
+  padding: '16px',
+  textAlign: 'center',
+  borderTop: '1px solid #e0e0e0',
+  backgroundColor: '#ffffff',
+  flexShrink: 0, // Don't shrink the footer
 }));
 
 const StyledSearchField = styled(TextField)(() => ({
@@ -158,10 +191,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onNavigate, currentSec
       icon: <Receipt />,
       hasSubmenu: true,
       submenu: [
+        { id: 'purchase-voucher', title: 'Purchase Voucher', icon: <Receipt /> },
+        { id: 'purchase-return', title: 'Purchase Return', icon: <Receipt /> },
+        { id: 'sales-voucher', title: 'Sales Voucher', icon: <Receipt /> },
+        { id: 'sales-return', title: 'Sales Return', icon: <Receipt /> },
         { id: 'journal-voucher', title: 'Journal Voucher', icon: <Receipt /> },
         { id: 'cash-voucher', title: 'Cash Voucher', icon: <Receipt /> },
-        { id: 'purchase-voucher', title: 'Purchase Voucher', icon: <Receipt /> },
-        { id: 'sale-voucher', title: 'Sale Voucher', icon: <Receipt /> },
       ],
     },
     {
@@ -257,73 +292,73 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onNavigate, currentSec
         />
       </SearchContainer>
 
-      {/* Navigation Menu */}
-      <List sx={{ pt: 2 }}>
-        {filteredMenuSections.map((section) => (
-          <React.Fragment key={section.id}>
-            <ListItem disablePadding>
-              <StyledListItemButton
-                selected={currentSection === section.id}
-                onClick={() => handleSectionClick(section.id, section.hasSubmenu)}
-              >
-                <ListItemIcon sx={{ color: '#666' }}>
-                  {section.icon}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={section.title}
-                  sx={{ 
-                    '& .MuiListItemText-primary': { 
-                      fontWeight: '500',
-                      color: '#333'
-                    }
-                  }}
-                />
-                {section.hasSubmenu && (
-                  isExpanded(section.id) ? <ExpandLess /> : <ExpandMore />
-                )}
-              </StyledListItemButton>
-            </ListItem>
+      {/* Scrollable Navigation Menu */}
+      <ScrollableMenuContainer>
+        <List sx={{ pt: 2, pb: 2 }}>
+          {filteredMenuSections.map((section) => (
+            <React.Fragment key={section.id}>
+              <ListItem disablePadding>
+                <StyledListItemButton
+                  selected={currentSection === section.id}
+                  onClick={() => handleSectionClick(section.id, section.hasSubmenu)}
+                >
+                  <ListItemIcon sx={{ color: '#666' }}>
+                    {section.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={section.title}
+                    sx={{
+                      '& .MuiListItemText-primary': {
+                        fontWeight: '500',
+                        color: '#333'
+                      }
+                    }}
+                  />
+                  {section.hasSubmenu && (
+                    isExpanded(section.id) ? <ExpandLess /> : <ExpandMore />
+                  )}
+                </StyledListItemButton>
+              </ListItem>
 
-            {/* Submenu */}
-            {section.hasSubmenu && (
-              <Collapse in={isExpanded(section.id)} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {section.submenu?.map((submenuItem) => (
-                    <ListItem key={submenuItem.id} disablePadding>
-                      <SubListItem
-                        selected={currentSection === submenuItem.id}
-                        onClick={() => handleSubmenuClick(submenuItem.id)}
-                      >
-                        <ListItemIcon sx={{ color: '#666', minWidth: '36px' }}>
-                          {submenuItem.icon}
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary={submenuItem.title}
-                          sx={{ 
-                            '& .MuiListItemText-primary': { 
-                              fontSize: '14px',
-                              color: '#555'
-                            }
-                          }}
-                        />
-                      </SubListItem>
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            )}
-          </React.Fragment>
-        ))}
-      </List>
+              {/* Submenu */}
+              {section.hasSubmenu && (
+                <Collapse in={isExpanded(section.id)} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {section.submenu?.map((submenuItem) => (
+                      <ListItem key={submenuItem.id} disablePadding>
+                        <SubListItem
+                          selected={currentSection === submenuItem.id}
+                          onClick={() => handleSubmenuClick(submenuItem.id)}
+                        >
+                          <ListItemIcon sx={{ color: '#666', minWidth: '36px' }}>
+                            {submenuItem.icon}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={submenuItem.title}
+                            sx={{
+                              '& .MuiListItemText-primary': {
+                                fontSize: '14px',
+                                color: '#555'
+                              }
+                            }}
+                          />
+                        </SubListItem>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+              )}
+            </React.Fragment>
+          ))}
+        </List>
+      </ScrollableMenuContainer>
 
-      <Divider sx={{ mt: 'auto', mb: 2 }} />
-      
       {/* Footer */}
-      <Box sx={{ p: 2, textAlign: 'center' }}>
+      <SidebarFooter>
         <Typography variant="caption" sx={{ color: '#999' }}>
           Version 1.0.0
         </Typography>
-      </Box>
+      </SidebarFooter>
     </StyledDrawer>
   );
 };

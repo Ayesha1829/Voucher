@@ -65,6 +65,16 @@ const StocksItemList: React.FC<StockItemListProps> = ({
   onDelete,
   onView,
 }) => {
+  // Helper function to format date to dd/mm/yyyy
+  const formatDateToDisplay = (dateString: string): string => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   // State for search and filtering
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -299,21 +309,25 @@ const StocksItemList: React.FC<StockItemListProps> = ({
   };
 
   return (
-    <Box
-      sx={{
-        p: { xs: 1, sm: 2, md: 3 },
-        maxWidth: { xs: '100%', md: 1400 },
-        mx: "auto",
-        color: "white",
-        backgroundColor: "#D9E1FA",
-        px: { xs: 0.5, sm: 1, md: 0 }
-      }}
-    >
+    <Box sx={{
+      width: { xs: '100%', md: '100vw' },
+      position: { xs: 'static', md: 'relative' },
+      left: { xs: 'auto', md: '50%' },
+      right: { xs: 'auto', md: '50%' },
+      marginLeft: { xs: '0', md: 'calc(-50vw + 20vw)' },
+      marginRight: { xs: '0', md: '-50vw' },
+      py: { xs: 2, md: 4 },
+      px: { xs: 2, md: 6 },
+      minHeight: '100vh',
+      backgroundColor: '#D9E1FA'
+    }}>
       {/* Header */}
       <Paper elevation={3} sx={{
-        p: { xs: 1.5, sm: 2, md: 3 },
-        mb: { xs: 1.5, sm: 2, md: 3 },
-        mx: { xs: 0.5, sm: 0.5, md: 0 }
+        p: { xs: 2, md: 3 },
+        mb: { xs: 2, md: 3 },
+        borderRadius: { xs: 1, md: 2 },
+        mx: { xs: 0, md: 0 },
+        width: '100%'
       }}>
         <Typography
           variant="h4"
@@ -351,41 +365,50 @@ const StocksItemList: React.FC<StockItemListProps> = ({
             flex: { xs: '1 1 calc(50% - 4px)', sm: '1 1 calc(25% - 12px)', md: 1 },
             minWidth: { xs: 140, sm: 180, md: 200 }
           }}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+            <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
+              <Typography color="textSecondary" gutterBottom sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Total Items
               </Typography>
-              <Typography variant="h5" component="div">
+              <Typography variant="h5" component="div" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
                 {totalItems}
               </Typography>
             </CardContent>
           </Card>
-          <Card sx={{ flex: 1, minWidth: 200 }}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+          <Card sx={{
+            flex: { xs: '1 1 calc(50% - 4px)', sm: '1 1 calc(25% - 12px)', md: 1 },
+            minWidth: { xs: 140, sm: 180, md: 200 }
+          }}>
+            <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
+              <Typography color="textSecondary" gutterBottom sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Total Value
               </Typography>
-              <Typography variant="h5" component="div">
+              <Typography variant="h5" component="div" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
                 ${totalValue.toFixed(2)}
               </Typography>
             </CardContent>
           </Card>
-          <Card sx={{ flex: 1, minWidth: 200 }}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+          <Card sx={{
+            flex: { xs: '1 1 calc(50% - 4px)', sm: '1 1 calc(25% - 12px)', md: 1 },
+            minWidth: { xs: 140, sm: 180, md: 200 }
+          }}>
+            <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
+              <Typography color="textSecondary" gutterBottom sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Low Stock
               </Typography>
-              <Typography variant="h5" component="div" color="warning.main">
+              <Typography variant="h5" component="div" color="warning.main" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
                 {lowStockItems}
               </Typography>
             </CardContent>
           </Card>
-          <Card sx={{ flex: 1, minWidth: 200 }}>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
+          <Card sx={{
+            flex: { xs: '1 1 calc(50% - 4px)', sm: '1 1 calc(25% - 12px)', md: 1 },
+            minWidth: { xs: 140, sm: 180, md: 200 }
+          }}>
+            <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
+              <Typography color="textSecondary" gutterBottom sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Out of Stock
               </Typography>
-              <Typography variant="h5" component="div" color="error.main">
+              <Typography variant="h5" component="div" color="error.main" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
                 {outOfStockItems}
               </Typography>
             </CardContent>
@@ -553,7 +576,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                   {item.dateAdded && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, pt: 1, borderTop: '1px solid #e0e0e0' }}>
                       <Typography variant="caption" color="textSecondary">
-                        Added: {item.dateAdded}
+                        Added: {formatDateToDisplay(item.dateAdded)}
                       </Typography>
                     </Box>
                   )}
@@ -663,7 +686,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" color="textSecondary">
-                        {item.dateAdded || "N/A"}
+                        {formatDateToDisplay(item.dateAdded || "")}
                       </Typography>
                     </TableCell>
                     <TableCell>

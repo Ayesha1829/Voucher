@@ -162,16 +162,24 @@ const CreateStocks: React.FC = () => {
 
   return (
     <Box sx={{
-      width: '100%',
-      mx: "auto",
-      overflow: 'hidden'
+      width: { xs: '100%', md: '100vw' },
+      position: { xs: 'static', md: 'relative' },
+      left: { xs: 'auto', md: '50%' },
+      right: { xs: 'auto', md: '50%' },
+      marginLeft: { xs: '0', md: 'calc(-50vw + 20vw)' },
+      marginRight: { xs: '0', md: '-50vw' },
+      py: { xs: 2, md: 4 },
+      px: { xs: 2, md: 6 },
+      minHeight: '100vh',
+      backgroundColor: '#D9E1FA'
     }}>
       {/* Main Content Container */}
       <Box sx={{ width: '100%', mx: 'auto' }}>
         <Paper elevation={3} sx={{
-          p: { xs: 2, sm: 2, md: 3 },
-          m: 0,
-          borderRadius: 0,
+          p: { xs: 2, md: 3 },
+          mb: { xs: 2, md: 3 },
+          borderRadius: { xs: 1, md: 2 },
+          mx: { xs: 0, md: 0 },
           width: '100%'
         }}>
         <Typography
