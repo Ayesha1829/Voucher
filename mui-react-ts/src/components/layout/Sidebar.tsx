@@ -8,7 +8,6 @@ import {
   ListItemText,
   Typography,
   Box,
-  Divider,
   Collapse,
   IconButton,
   TextField,
@@ -27,7 +26,6 @@ import {
   ShoppingCart,
   Assessment,
   Settings,
-  Menu,
   Search,
   Close,
 } from "@mui/icons-material";
@@ -114,7 +112,7 @@ const StyledSearchField = styled(TextField)(() => ({
   },
 }));
 
-const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
+const StyledListItemButton = styled(ListItemButton)(() => ({
   borderRadius: "8px",
   margin: "4px 8px",
   "&:hover": {
@@ -128,7 +126,7 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   },
 }));
 
-const SubListItem = styled(ListItemButton)(({ theme }) => ({
+const SubListItem = styled(ListItemButton)(() => ({
   paddingLeft: "48px",
   borderRadius: "8px",
   margin: "2px 16px",
@@ -199,9 +197,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       hasSubmenu: true,
       submenu: [
         { id: "purchase-voucher", title: "Purchase Voucher", icon: <Receipt /> },
-        { id: "purchase-return", title: "Purchase Return", icon: <Receipt /> },
+        { id: "purchase-return-list", title: "Purchase Return", icon: <Receipt /> },
         { id: "sales-voucher", title: "Sales Voucher", icon: <Receipt /> },
-        { id: "sales-return", title: "Sales Return", icon: <Receipt /> },
+        { id: "sales-return-list", title: "Sales Return", icon: <Receipt /> },
         { id: "journal-voucher", title: "Journal Voucher", icon: <Receipt /> },
         { id: "cash-voucher", title: "Cash Voucher", icon: <Receipt /> },
       ],

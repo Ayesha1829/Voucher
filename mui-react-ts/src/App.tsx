@@ -66,36 +66,12 @@ function App() {
         );
       case "purchase-voucher":
         return <PurchaseVoucher />;
-      case "purchase-return":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Purchase Return - Coming Soon</h2>
-          </div>
-        );
       case "purchase-return-list":
         return <PurchaseReturnList />;
       case "sales-return-list":
         return <SalesReturnList />;
       case "sales-voucher":
         return <SalesVoucher />;
-      case "sales-return":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Sales Return - Coming Soon</h2>
-          </div>
-        );
-      case "journal-voucher":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Journal Voucher - Coming Soon</h2>
-          </div>
-        );
-      case "cash-voucher":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Cash Voucher - Coming Soon</h2>
-          </div>
-        );
       case "reports":
         return (
           <div style={{ padding: "20px", textAlign: "center" }}>

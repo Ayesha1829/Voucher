@@ -70,14 +70,7 @@ const SalesVoucher: React.FC = () => {
     return `${day}/${month}/${year}`;
   };
 
-  // Get today's date in yyyy-mm-dd format for default
-  const getTodayDate = (): string => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const day = today.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+
   const [selectedParty, setSelectedParty] = useState("");
   const [carton, setCarton] = useState("");
   const [closingBalance, setClosingBalance] = useState("");
@@ -100,7 +93,7 @@ const SalesVoucher: React.FC = () => {
 
   // Function to generate unique ID
   const generateId = () => {
-    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    return Date.now().toString() + Math.random().toString(36).substring(2, 11);
   };
 
   // Function to calculate total with discounts

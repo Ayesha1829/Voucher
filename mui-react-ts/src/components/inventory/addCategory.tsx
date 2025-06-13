@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Card,
   TextField,
   Button,
   Typography,
@@ -9,89 +8,10 @@ import {
   List,
   ListItem,
   ListItemText,
-  Divider,
   Alert,
   Snackbar,
   Chip
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-
-// Custom styled components with the specified color scheme
-const MainCard = styled(Card)(() => ({
-  backgroundColor: '#ffffff',
-  borderRadius: '16px',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-  border: 'none',
-  maxWidth: '800px',
-  margin: '0 auto',
-}));
-
-const HeaderCard = styled(Card)(() => ({
-  backgroundColor: '#D9E1FA',
-  borderRadius: '12px',
-  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-  border: 'none',
-  margin: '0 0 24px 0',
-}));
-
-const StyledButton = styled(Button)(() => ({
-  backgroundColor: '#D9E1FA',
-  color: '#333',
-  borderRadius: '12px',
-  padding: '12px 24px',
-  fontWeight: 'bold',
-  textTransform: 'none',
-  fontSize: '16px',
-  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-  border: '2px solid #D9E1FA',
-  '&:hover': {
-    backgroundColor: '#B8C5F2',
-    borderColor: '#B8C5F2',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
-  },
-  '&:active': {
-    transform: 'translateY(0)',
-  },
-}));
-
-const StyledTextField = styled(TextField)(() => ({
-  '& .MuiOutlinedInput-root': {
-    backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    '& fieldset': {
-      borderColor: '#D9E1FA',
-      borderWidth: '2px',
-    },
-    '&:hover fieldset': {
-      borderColor: '#B8C5F2',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#9BB0E8',
-    },
-  },
-  '& .MuiInputLabel-root': {
-    color: '#666',
-    fontWeight: '500',
-  },
-}));
-
-const HeaderTitle = styled(Typography)(() => ({
-  color: '#333',
-  fontWeight: 'bold',
-  textAlign: 'center',
-  padding: '20px',
-  fontSize: '28px',
-}));
-
-const CategoryListContainer = styled(Paper)(() => ({
-  backgroundColor: '#ffffff',
-  borderRadius: '12px',
-  padding: '16px',
-  marginTop: '20px',
-  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-  border: '1px solid #D9E1FA',
-}));
 
 // Interface for Category
 interface Category {

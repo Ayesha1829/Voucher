@@ -197,7 +197,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
           </NavButton>
 
           {/* Purchase Return */}
-          <NavButton onClick={() => onNavigate('purchase-return')}>
+          <NavButton onClick={() => onNavigate('purchase-return-list')}>
             Purchase Return
           </NavButton>
 
@@ -207,7 +207,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
           </NavButton>
 
           {/* Sales Return */}
-          <NavButton onClick={() => onNavigate('sales-return')}>
+          <NavButton onClick={() => onNavigate('sales-return-list')}>
             Sales Return
           </NavButton>
 
@@ -364,7 +364,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
 
           {/* Purchase Return */}
           <ListItem
-            onClick={() => handleMobileNavigation('purchase-return')}
+            onClick={() => handleMobileNavigation('purchase-return-list')}
             sx={{
               cursor: 'pointer',
               '&:hover': { backgroundColor: '#f8f9ff' }
@@ -398,7 +398,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
 
           {/* Sales Return */}
           <ListItem
-            onClick={() => handleMobileNavigation('sales-return')}
+            onClick={() => handleMobileNavigation('sales-return-list')}
             sx={{
               cursor: 'pointer',
               '&:hover': { backgroundColor: '#f8f9ff' }
