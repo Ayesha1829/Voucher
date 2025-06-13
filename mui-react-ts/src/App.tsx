@@ -1,34 +1,117 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { useState } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Layout from './components/layout/Layout';
+import AddCategory from './components/inventory/addCategory';
+import './App.css';
+
+// Create a custom theme
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#D9E1FA',
+    },
+    secondary: {
+      main: '#ffffff',
+    },
+    background: {
+      default: '#D9E1FA',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [currentSection, setCurrentSection] = useState<string>('add-category');
+
+  const handleNavigate = (section: string) => {
+    setCurrentSection(section);
+  };
+
+  const renderContent = () => {
+    switch (currentSection) {
+      case 'add-category':
+        return <AddCategory />;
+      case 'dashboard':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Dashboard - Coming Soon</h2>
+          </div>
+        );
+      case 'add-stock':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Add Stock - Coming Soon</h2>
+          </div>
+        );
+      case 'stock-list':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Stock List - Coming Soon</h2>
+          </div>
+        );
+      case 'stock-summary':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Stock Summary - Coming Soon</h2>
+          </div>
+        );
+      case 'nil-stocks':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Nil Stocks - Coming Soon</h2>
+          </div>
+        );
+      case 'journal-voucher':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Journal Voucher - Coming Soon</h2>
+          </div>
+        );
+      case 'cash-voucher':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Cash Voucher - Coming Soon</h2>
+          </div>
+        );
+      case 'purchase-voucher':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Purchase Voucher - Coming Soon</h2>
+          </div>
+        );
+      case 'sale-voucher':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Sale Voucher - Coming Soon</h2>
+          </div>
+        );
+      case 'reports':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Reports - Coming Soon</h2>
+          </div>
+        );
+      case 'settings':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Settings - Coming Soon</h2>
+          </div>
+        );
+      default:
+        return <AddCategory />;
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Layout currentSection={currentSection} onNavigate={handleNavigate}>
+        {renderContent()}
+      </Layout>
+    </ThemeProvider>
   );
 }
 
