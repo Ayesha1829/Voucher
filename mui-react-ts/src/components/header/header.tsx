@@ -37,37 +37,32 @@ const StyledAppBar = styled(AppBar)(() => ({
   borderBottom: '1px solid #B8C5F2',
 }));
 
-const LogoContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  marginRight: '32px',
-  [theme.breakpoints.down('md')]: {
-    marginRight: '16px',
-  },
-}));
 
-const NavButton = styled(Button)(() => ({
+
+const DropdownButton = styled(Button)(({ theme }) => ({
   color: '#333',
   fontWeight: '500',
   textTransform: 'none',
   fontSize: '16px',
-  padding: '8px 16px',
+  padding: '10px 16px',
   borderRadius: '8px',
+  minWidth: 'auto',
+  whiteSpace: 'nowrap',
+  height: '40px',
   '&:hover': {
     backgroundColor: '#B8C5F2',
   },
-}));
-
-const DropdownButton = styled(Button)(() => ({
-  color: '#333',
-  fontWeight: '500',
-  textTransform: 'none',
-  fontSize: '16px',
-  padding: '8px 16px',
-  borderRadius: '8px',
-  '&:hover': {
-    backgroundColor: '#B8C5F2',
+  '& .MuiButton-endIcon': {
+    marginLeft: '6px',
+    '& svg': {
+      fontSize: '18px'
+    }
   },
+  [theme.breakpoints.down('lg')]: {
+    fontSize: '15px',
+    padding: '8px 14px',
+    height: '36px',
+  }
 }));
 
 
@@ -75,8 +70,10 @@ const DropdownButton = styled(Button)(() => ({
 const RightSection = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'center',
-  gap: '16px',
+  gap: '12px',
   marginLeft: 'auto',
+  flexShrink: 0,
+  paddingLeft: '16px',
 }));
 
 interface HeaderProps {
@@ -86,8 +83,16 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
   const [inventoryAnchorEl, setInventoryAnchorEl] = useState<null | HTMLElement>(null);
   const [languageAnchorEl, setLanguageAnchorEl] = useState<null | HTMLElement>(null);
+  const [purchaseVoucherAnchorEl, setPurchaseVoucherAnchorEl] = useState<null | HTMLElement>(null);
+  const [salesVoucherAnchorEl, setSalesVoucherAnchorEl] = useState<null | HTMLElement>(null);
+  const [purchaseReturnAnchorEl, setPurchaseReturnAnchorEl] = useState<null | HTMLElement>(null);
+  const [salesReturnAnchorEl, setSalesReturnAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [inventoryExpanded, setInventoryExpanded] = useState(false);
+  const [purchaseVoucherExpanded, setPurchaseVoucherExpanded] = useState(false);
+  const [salesVoucherExpanded, setSalesVoucherExpanded] = useState(false);
+  const [purchaseReturnExpanded, setPurchaseReturnExpanded] = useState(false);
+  const [salesReturnExpanded, setSalesReturnExpanded] = useState(false);
 
   // Inventory dropdown items
   const inventoryItems = [
@@ -96,6 +101,30 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     { id: 'stock-list', label: 'Stock List' },
     { id: 'stock-summary', label: 'Stock Summary' },
     { id: 'nil-stocks', label: 'Nil Stocks' },
+  ];
+
+  // Purchase Voucher dropdown items
+  const purchaseVoucherItems = [
+    { id: 'purchase-voucher', label: 'View P Voucher' },
+    { id: 'void-purchase-voucher', label: 'Void P Voucher' },
+  ];
+
+  // Sales Voucher dropdown items
+  const salesVoucherItems = [
+    { id: 'sales-voucher', label: 'View Sales Voucher' },
+    { id: 'void-sales-voucher', label: 'Void Sales Voucher' },
+  ];
+
+  // Purchase Return dropdown items
+  const purchaseReturnItems = [
+    { id: 'purchase-return-list', label: 'View Purchase Return' },
+    { id: 'void-purchase-return', label: 'Void Purchase Return' },
+  ];
+
+  // Sales Return dropdown items
+  const salesReturnItems = [
+    { id: 'sales-return-list', label: 'View Sales Return' },
+    { id: 'void-sales-return', label: 'Void Sales Return' },
   ];
 
   // Language options
@@ -118,6 +147,62 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
   const handleInventoryItemClick = (itemId: string) => {
     onNavigate(itemId);
     handleInventoryClose();
+  };
+
+  // Purchase Voucher handlers
+  const handlePurchaseVoucherClick = (event: React.MouseEvent<HTMLElement>) => {
+    setPurchaseVoucherAnchorEl(event.currentTarget);
+  };
+
+  const handlePurchaseVoucherClose = () => {
+    setPurchaseVoucherAnchorEl(null);
+  };
+
+  const handlePurchaseVoucherItemClick = (itemId: string) => {
+    onNavigate(itemId);
+    handlePurchaseVoucherClose();
+  };
+
+  // Sales Voucher handlers
+  const handleSalesVoucherClick = (event: React.MouseEvent<HTMLElement>) => {
+    setSalesVoucherAnchorEl(event.currentTarget);
+  };
+
+  const handleSalesVoucherClose = () => {
+    setSalesVoucherAnchorEl(null);
+  };
+
+  const handleSalesVoucherItemClick = (itemId: string) => {
+    onNavigate(itemId);
+    handleSalesVoucherClose();
+  };
+
+  // Purchase Return handlers
+  const handlePurchaseReturnClick = (event: React.MouseEvent<HTMLElement>) => {
+    setPurchaseReturnAnchorEl(event.currentTarget);
+  };
+
+  const handlePurchaseReturnClose = () => {
+    setPurchaseReturnAnchorEl(null);
+  };
+
+  const handlePurchaseReturnItemClick = (itemId: string) => {
+    onNavigate(itemId);
+    handlePurchaseReturnClose();
+  };
+
+  // Sales Return handlers
+  const handleSalesReturnClick = (event: React.MouseEvent<HTMLElement>) => {
+    setSalesReturnAnchorEl(event.currentTarget);
+  };
+
+  const handleSalesReturnClose = () => {
+    setSalesReturnAnchorEl(null);
+  };
+
+  const handleSalesReturnItemClick = (itemId: string) => {
+    onNavigate(itemId);
+    handleSalesReturnClose();
   };
 
   const handleLanguageClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -151,9 +236,33 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     setInventoryExpanded(!inventoryExpanded);
   };
 
+  const handlePurchaseVoucherToggle = () => {
+    setPurchaseVoucherExpanded(!purchaseVoucherExpanded);
+  };
+
+  const handleSalesVoucherToggle = () => {
+    setSalesVoucherExpanded(!salesVoucherExpanded);
+  };
+
+  const handlePurchaseReturnToggle = () => {
+    setPurchaseReturnExpanded(!purchaseReturnExpanded);
+  };
+
+  const handleSalesReturnToggle = () => {
+    setSalesReturnExpanded(!salesReturnExpanded);
+  };
+
   return (
     <StyledAppBar position="static">
-      <Toolbar sx={{ px: { xs: 1, md: 3 } }}>
+      <Toolbar sx={{
+        px: { xs: 1, md: 3 },
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        minHeight: { xs: '64px', sm: '72px', md: '80px' },
+        gap: { xs: 1, sm: 2 },
+        maxWidth: '100%',
+        overflow: 'visible'
+      }}>
         {/* Mobile Menu Button */}
         <IconButton
           edge="start"
@@ -169,47 +278,169 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
           <MenuIcon />
         </IconButton>
 
-        {/* Logo Section */}
-        <LogoContainer sx={{ mr: { xs: 1, md: 4 } }}>
-          <Box
-            component="img"
-            src="/image.png"
-            alt="Company Logo"
-            sx={{
-              width: { xs: '40px', md: '60px' },
-              height: { xs: '30px', md: '40px' },
-              mr: { xs: 1, md: 2 },
-              objectFit: 'contain',
-            }}
-          />
-        </LogoContainer>
+
 
         {/* Navigation Menu */}
         <Box sx={{
           display: { xs: 'none', md: 'flex' },
           alignItems: 'center',
-          gap: { md: 2, lg: 3 },
-          flexWrap: 'wrap'
+          gap: { md: 3, lg: 4 },
+          flex: 1,
+          justifyContent: 'flex-start',
+          maxWidth: 'calc(100% - 200px)', // More space since no logo
+          overflow: 'visible'
         }}>
-          {/* Purchase Voucher */}
-          <NavButton onClick={() => onNavigate('purchase-voucher')}>
+          {/* Purchase Voucher Dropdown */}
+          <DropdownButton
+            onClick={handlePurchaseVoucherClick}
+            endIcon={<ExpandMoreIcon />}
+          >
             Purchase Voucher
-          </NavButton>
+          </DropdownButton>
+          <Menu
+            anchorEl={purchaseVoucherAnchorEl}
+            open={Boolean(purchaseVoucherAnchorEl)}
+            onClose={handlePurchaseVoucherClose}
+            slotProps={{
+              paper: {
+                sx: {
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #D9E1FA',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                  mt: 1,
+                },
+              },
+            }}
+          >
+            {purchaseVoucherItems.map((item) => (
+              <MenuItem
+                key={item.id}
+                onClick={() => handlePurchaseVoucherItemClick(item.id)}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#f8f9ff',
+                  },
+                }}
+              >
+                {item.label}
+              </MenuItem>
+            ))}
+          </Menu>
 
-          {/* Purchase Return */}
-          <NavButton onClick={() => onNavigate('purchase-return-list')}>
+          {/* Purchase Return Dropdown */}
+          <DropdownButton
+            onClick={handlePurchaseReturnClick}
+            endIcon={<ExpandMoreIcon />}
+          >
             Purchase Return
-          </NavButton>
+          </DropdownButton>
+          <Menu
+            anchorEl={purchaseReturnAnchorEl}
+            open={Boolean(purchaseReturnAnchorEl)}
+            onClose={handlePurchaseReturnClose}
+            slotProps={{
+              paper: {
+                sx: {
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #D9E1FA',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                  mt: 1,
+                },
+              },
+            }}
+          >
+            {purchaseReturnItems.map((item) => (
+              <MenuItem
+                key={item.id}
+                onClick={() => handlePurchaseReturnItemClick(item.id)}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#f8f9ff',
+                  },
+                }}
+              >
+                {item.label}
+              </MenuItem>
+            ))}
+          </Menu>
 
-          {/* Sales Voucher */}
-          <NavButton onClick={() => onNavigate('sales-voucher')}>
+          {/* Sales Voucher Dropdown */}
+          <DropdownButton
+            onClick={handleSalesVoucherClick}
+            endIcon={<ExpandMoreIcon />}
+          >
             Sales Voucher
-          </NavButton>
+          </DropdownButton>
+          <Menu
+            anchorEl={salesVoucherAnchorEl}
+            open={Boolean(salesVoucherAnchorEl)}
+            onClose={handleSalesVoucherClose}
+            slotProps={{
+              paper: {
+                sx: {
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #D9E1FA',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                  mt: 1,
+                },
+              },
+            }}
+          >
+            {salesVoucherItems.map((item) => (
+              <MenuItem
+                key={item.id}
+                onClick={() => handleSalesVoucherItemClick(item.id)}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#f8f9ff',
+                  },
+                }}
+              >
+                {item.label}
+              </MenuItem>
+            ))}
+          </Menu>
 
-          {/* Sales Return */}
-          <NavButton onClick={() => onNavigate('sales-return-list')}>
+          {/* Sales Return Dropdown */}
+          <DropdownButton
+            onClick={handleSalesReturnClick}
+            endIcon={<ExpandMoreIcon />}
+          >
             Sales Return
-          </NavButton>
+          </DropdownButton>
+          <Menu
+            anchorEl={salesReturnAnchorEl}
+            open={Boolean(salesReturnAnchorEl)}
+            onClose={handleSalesReturnClose}
+            slotProps={{
+              paper: {
+                sx: {
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #D9E1FA',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                  mt: 1,
+                },
+              },
+            }}
+          >
+            {salesReturnItems.map((item) => (
+              <MenuItem
+                key={item.id}
+                onClick={() => handleSalesReturnItemClick(item.id)}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#f8f9ff',
+                  },
+                }}
+              >
+                {item.label}
+              </MenuItem>
+            ))}
+          </Menu>
 
           {/* Inventory Dropdown */}
           <DropdownButton
@@ -345,9 +576,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
         }}
       >
         <List>
-          {/* Purchase Voucher */}
+          {/* Purchase Voucher Section */}
           <ListItem
-            onClick={() => handleMobileNavigation('purchase-voucher')}
+            onClick={handlePurchaseVoucherToggle}
             sx={{
               cursor: 'pointer',
               '&:hover': { backgroundColor: '#f8f9ff' }
@@ -360,11 +591,39 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
               primary="Purchase Voucher"
               sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
             />
+            {purchaseVoucherExpanded ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
 
-          {/* Purchase Return */}
+          {/* Purchase Voucher Submenu */}
+          <Collapse in={purchaseVoucherExpanded} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {purchaseVoucherItems.map((item) => (
+                <ListItem
+                  key={item.id}
+                  onClick={() => handleMobileNavigation(item.id)}
+                  sx={{
+                    pl: 4,
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: '#f8f9ff' }
+                  }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontSize: '0.9rem',
+                        fontWeight: 400
+                      }
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
+
+          {/* Purchase Return Section */}
           <ListItem
-            onClick={() => handleMobileNavigation('purchase-return-list')}
+            onClick={handlePurchaseReturnToggle}
             sx={{
               cursor: 'pointer',
               '&:hover': { backgroundColor: '#f8f9ff' }
@@ -377,11 +636,39 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
               primary="Purchase Return"
               sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
             />
+            {purchaseReturnExpanded ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
 
-          {/* Sales Voucher */}
+          {/* Purchase Return Submenu */}
+          <Collapse in={purchaseReturnExpanded} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {purchaseReturnItems.map((item) => (
+                <ListItem
+                  key={item.id}
+                  onClick={() => handleMobileNavigation(item.id)}
+                  sx={{
+                    pl: 4,
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: '#f8f9ff' }
+                  }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontSize: '0.9rem',
+                        fontWeight: 400
+                      }
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
+
+          {/* Sales Voucher Section */}
           <ListItem
-            onClick={() => handleMobileNavigation('sales-voucher')}
+            onClick={handleSalesVoucherToggle}
             sx={{
               cursor: 'pointer',
               '&:hover': { backgroundColor: '#f8f9ff' }
@@ -394,11 +681,39 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
               primary="Sales Voucher"
               sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
             />
+            {salesVoucherExpanded ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
 
-          {/* Sales Return */}
+          {/* Sales Voucher Submenu */}
+          <Collapse in={salesVoucherExpanded} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {salesVoucherItems.map((item) => (
+                <ListItem
+                  key={item.id}
+                  onClick={() => handleMobileNavigation(item.id)}
+                  sx={{
+                    pl: 4,
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: '#f8f9ff' }
+                  }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontSize: '0.9rem',
+                        fontWeight: 400
+                      }
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
+
+          {/* Sales Return Section */}
           <ListItem
-            onClick={() => handleMobileNavigation('sales-return-list')}
+            onClick={handleSalesReturnToggle}
             sx={{
               cursor: 'pointer',
               '&:hover': { backgroundColor: '#f8f9ff' }
@@ -411,7 +726,35 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
               primary="Sales Return"
               sx={{ '& .MuiTypography-root': { fontWeight: 500 } }}
             />
+            {salesReturnExpanded ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
+
+          {/* Sales Return Submenu */}
+          <Collapse in={salesReturnExpanded} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {salesReturnItems.map((item) => (
+                <ListItem
+                  key={item.id}
+                  onClick={() => handleMobileNavigation(item.id)}
+                  sx={{
+                    pl: 4,
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: '#f8f9ff' }
+                  }}
+                >
+                  <ListItemText
+                    primary={item.label}
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontSize: '0.9rem',
+                        fontWeight: 400
+                      }
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
 
           {/* Inventory Section */}
           <ListItem
