@@ -64,7 +64,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 const FloatingMenuButton = styled(Fab)(() => ({
   position: 'fixed',
-  top: '20px',
+  top: '80px',
   left: '20px',
   backgroundColor: '#D9E1FA',
   color: '#ffffff',
@@ -107,7 +107,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentSection, onNavigate })
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#D9E1FA' }}>
+    <Box sx={{ display: 'flex', minHeight: 'calc(100vh - 64px)', backgroundColor: '#D9E1FA' }}>
       <CssBaseline />
 
       {/* Floating Menu Button - Only visible when sidebar is closed */}
@@ -120,26 +120,6 @@ const Layout: React.FC<LayoutProps> = ({ children, currentSection, onNavigate })
         </FloatingMenuButton>
       )}
 
-      {/* Top App Bar - Only visible when sidebar is open */}
-      {sidebarOpen && (
-        <StyledAppBar position="fixed" open={sidebarOpen}>
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="close drawer"
-              onClick={handleDrawerToggle}
-              edge="start"
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" noWrap component="div" sx={{ fontWeight: '600' }}>
-              {getSectionTitle(currentSection)}
-            </Typography>
-          </Toolbar>
-        </StyledAppBar>
-      )}
-
       {/* Sidebar */}
       <Sidebar
         open={sidebarOpen}
@@ -150,11 +130,10 @@ const Layout: React.FC<LayoutProps> = ({ children, currentSection, onNavigate })
 
       {/* Main Content Area */}
       <Main open={sidebarOpen}>
-        {sidebarOpen && <DrawerHeader />}
         <Box
           sx={{
             backgroundColor: '#D9E1FA',
-            minHeight: sidebarOpen ? 'calc(100vh - 64px)' : '100vh',
+            minHeight: 'calc(100vh - 64px)',
             borderRadius: '0',
             padding: 0,
           }}

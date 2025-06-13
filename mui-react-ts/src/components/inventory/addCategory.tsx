@@ -22,14 +22,8 @@ const MainCard = styled(Card)(() => ({
   borderRadius: '16px',
   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
   border: 'none',
-  width: '100%',
-  margin: '0',
-  position: 'relative',
-  left: '50%',
-  right: '50%',
-  marginLeft: '-50vw',
-  marginRight: '-50vw',
-  maxWidth: 'none',
+  maxWidth: '800px',
+  margin: '0 auto',
 }));
 
 const HeaderCard = styled(Card)(() => ({
@@ -163,68 +157,89 @@ const AddCategory: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: '100vw', position: 'relative', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw', py: 4 }}>
-      <MainCard>
-        <Box sx={{ p: 4 }}>
-          {/* Header Card */}
-          <HeaderCard>
-            <HeaderTitle variant="h4">
-              Add Category
-            </HeaderTitle>
-          </HeaderCard>
+    <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
+      {/* Header */}
+      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          align="center"
+          sx={{
+            mb: 3,
+            fontWeight: "bold",
+            color: "black",
+            backgroundColor: "#D9E1FA",
+            py: 2,
+            borderRadius: 1,
+          }}
+        >
+          Add Category
+        </Typography>
 
-          {/* Content */}
-          <Box>
-            <Box sx={{ mb: 3 }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  mb: 2,
-                  color: '#333',
-                  fontWeight: '600',
-                  textAlign: 'center'
-                }}
-              >
-                Category Name
-              </Typography>
+        {/* Content */}
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 2,
+              color: '#333',
+              fontWeight: '600',
+              textAlign: 'center'
+            }}
+          >
+            Category Name
+          </Typography>
 
-              <StyledTextField
-                fullWidth
-                variant="outlined"
-                placeholder="Enter category name"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSaveCategory();
-                  }
-                }}
-                sx={{ mb: 3 }}
-              />
-            </Box>
-
-            <Box sx={{ textAlign: 'center' }}>
-              <StyledButton
-                onClick={handleSaveCategory}
-                sx={{ mr: 2, minWidth: '120px' }}
-              >
-                SAVE
-              </StyledButton>
-
-              <StyledButton
-                onClick={handleToggleExistingCategories}
-                sx={{ minWidth: '180px' }}
-              >
-                {showExistingCategories ? 'Hide Categories' : 'Existing Categories'}
-              </StyledButton>
-            </Box>
-          </Box>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Enter category name"
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSaveCategory();
+              }
+            }}
+            sx={{ mb: 3 }}
+          />
         </Box>
-      </MainCard>
+
+        <Box sx={{ textAlign: 'center' }}>
+          <Button
+            variant="contained"
+            onClick={handleSaveCategory}
+            sx={{
+              mr: 2,
+              minWidth: '120px',
+              backgroundColor: "#4fc3f7",
+              "&:hover": {
+                backgroundColor: "#29b6f6",
+              },
+            }}
+          >
+            SAVE
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleToggleExistingCategories}
+            sx={{
+              minWidth: '180px',
+              backgroundColor: "#4fc3f7",
+              "&:hover": {
+                backgroundColor: "#29b6f6",
+              },
+            }}
+          >
+            {showExistingCategories ? 'Hide Categories' : 'Existing Categories'}
+          </Button>
+        </Box>
+      </Paper>
 
       {/* Existing Categories Section */}
       {showExistingCategories && (
-        <CategoryListContainer>
+        <Paper elevation={3} sx={{ p: 3 }}>
           <Typography
             variant="h6"
             sx={{
@@ -238,61 +253,89 @@ const AddCategory: React.FC = () => {
           </Typography>
 
           {categories.length === 0 ? (
-            <Typography
-              variant="body1"
-              sx={{
-                textAlign: 'center',
-                color: '#666',
-                fontStyle: 'italic',
-                py: 3
-              }}
-            >
-              No categories added yet
-            </Typography>
+            <Box sx={{
+              textAlign: 'center',
+              py: 6,
+              backgroundColor: '#f8f9ff',
+              borderRadius: 2,
+              border: '2px dashed #D9E1FA'
+            }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: '#666',
+                  fontStyle: 'italic',
+                  mb: 2
+                }}
+              >
+                No categories added yet
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#999',
+                }}
+              >
+                Start by adding your first category above
+              </Typography>
+            </Box>
           ) : (
-            <List>
-              {categories.map((category, index) => (
-                <React.Fragment key={category.id}>
-                  <ListItem
-                    sx={{
-                      py: 2,
-                      '&:hover': {
-                        backgroundColor: '#f8f9ff',
-                        borderRadius: '8px',
-                      }
-                    }}
-                  >
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Typography variant="h6" sx={{ color: '#333', fontWeight: '500' }}>
-                            {category.name}
+            <Box sx={{
+              backgroundColor: '#f8f9ff',
+              borderRadius: 2,
+              p: 2
+            }}>
+              <List sx={{ p: 0 }}>
+                {categories.map((category, index) => (
+                  <React.Fragment key={category.id}>
+                    <ListItem
+                      sx={{
+                        py: 2,
+                        px: 3,
+                        borderRadius: 2,
+                        mb: 1,
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e0e0e0',
+                        '&:hover': {
+                          backgroundColor: '#f0f7ff',
+                          borderColor: '#D9E1FA',
+                          transform: 'translateY(-1px)',
+                        },
+                        transition: 'all 0.2s ease-in-out',
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                            <Typography variant="h6" sx={{ color: '#333', fontWeight: '600' }}>
+                              {category.name}
+                            </Typography>
+                            <Chip
+                              label={`ID: ${category.id}`}
+                              size="small"
+                              sx={{
+                                backgroundColor: '#D9E1FA',
+                                color: '#333',
+                                fontFamily: 'monospace',
+                                fontSize: '11px',
+                                fontWeight: 'bold'
+                              }}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Typography variant="body2" sx={{ color: '#666' }}>
+                            📅 Created: {category.createdAt.toLocaleDateString()} at {category.createdAt.toLocaleTimeString()}
                           </Typography>
-                          <Chip
-                            label={category.id}
-                            size="small"
-                            sx={{
-                              backgroundColor: '#D9E1FA',
-                              color: '#333',
-                              fontFamily: 'monospace',
-                              fontSize: '12px'
-                            }}
-                          />
-                        </Box>
-                      }
-                      secondary={
-                        <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
-                          Created: {category.createdAt.toLocaleDateString()} at {category.createdAt.toLocaleTimeString()}
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                  {index < categories.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
+                        }
+                      />
+                    </ListItem>
+                  </React.Fragment>
+                ))}
+              </List>
+            </Box>
           )}
-        </CategoryListContainer>
+        </Paper>
       )}
 
       {/* Snackbar for notifications */}

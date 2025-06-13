@@ -317,8 +317,8 @@ const StocksItemList: React.FC<StockItemListProps> = ({
           sx={{
             mb: 3,
             fontWeight: "bold",
-            color: "primary.main",
-            backgroundColor: "#e3f2fd",
+            color: "black",
+            backgroundColor: "#D9E1FA",
             py: 2,
             borderRadius: 1,
             display: "flex",

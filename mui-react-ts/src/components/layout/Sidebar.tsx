@@ -29,6 +29,7 @@ import {
   Settings,
   Menu,
   Search,
+  Close,
 } from '@mui/icons-material';
 
 const drawerWidth = 280;
@@ -42,6 +43,8 @@ const StyledDrawer = styled(Drawer)(() => ({
     boxSizing: 'border-box',
     backgroundColor: '#ffffff',
     borderRight: '2px solid #D9E1FA',
+    top: '64px', // Position below header
+    height: 'calc(100vh - 64px)', // Adjust height for header
   },
 }));
 
@@ -210,10 +213,23 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onNavigate, currentSec
     >
       {/* Header */}
       <SidebarHeader>
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333' }}>
-          EV System
-        </Typography>
-        <Typography variant="body2" sx={{ color: '#666', mt: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#333' }}>
+            EV System
+          </Typography>
+          <IconButton
+            onClick={onClose}
+            sx={{
+              color: '#333',
+              '&:hover': {
+                backgroundColor: '#B8C5F2',
+              },
+            }}
+          >
+            <Close />
+          </IconButton>
+        </Box>
+        <Typography variant="body2" sx={{ color: '#666' }}>
           Voucher Management
         </Typography>
       </SidebarHeader>

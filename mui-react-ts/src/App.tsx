@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Box } from '@mui/material';
+import Header from './components/header/header';
 import Layout from './components/layout/Layout';
 import AddCategory from './components/inventory/addCategory';
+import CreateStocks from './components/inventory/addStock';
+import StocksItemList from './components/inventory/stocksItemList';
 import './App.css';
 
 // Create a custom theme
@@ -41,17 +45,9 @@ function App() {
           </div>
         );
       case 'add-stock':
-        return (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Add Stock - Coming Soon</h2>
-          </div>
-        );
+        return <CreateStocks />;
       case 'stock-list':
-        return (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Stock List - Coming Soon</h2>
-          </div>
-        );
+        return <StocksItemList />;
       case 'stock-summary':
         return (
           <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -62,6 +58,30 @@ function App() {
         return (
           <div style={{ padding: '20px', textAlign: 'center' }}>
             <h2>Nil Stocks - Coming Soon</h2>
+          </div>
+        );
+      case 'purchase-voucher':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Purchase Voucher - Coming Soon</h2>
+          </div>
+        );
+      case 'purchase-return':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Purchase Return - Coming Soon</h2>
+          </div>
+        );
+      case 'sales-voucher':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Sales Voucher - Coming Soon</h2>
+          </div>
+        );
+      case 'sales-return':
+        return (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Sales Return - Coming Soon</h2>
           </div>
         );
       case 'journal-voucher':
@@ -108,9 +128,17 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Layout currentSection={currentSection} onNavigate={handleNavigate}>
-        {renderContent()}
-      </Layout>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {/* Header */}
+        <Header onNavigate={handleNavigate} />
+
+        {/* Main Content with Sidebar */}
+        <Box sx={{ display: 'flex', flex: 1 }}>
+          <Layout currentSection={currentSection} onNavigate={handleNavigate}>
+            {renderContent()}
+          </Layout>
+        </Box>
+      </Box>
     </ThemeProvider>
   );
 }

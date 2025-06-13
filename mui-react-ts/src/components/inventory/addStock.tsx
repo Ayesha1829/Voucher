@@ -35,10 +35,7 @@ interface Category {
   name: string;
 }
 
-interface Unit {
-  id: string;
-  name: string;
-}
+
 
 const CreateStocks: React.FC = () => {
   // Sample data for categories and units
@@ -50,13 +47,7 @@ const CreateStocks: React.FC = () => {
     { id: "5", name: "Home & Garden" },
   ]);
 
-  const [units] = useState<Unit[]>([
-    { id: "1", name: "Pieces" },
-    { id: "2", name: "Kg" },
-    { id: "3", name: "Liters" },
-    { id: "4", name: "Meters" },
-    { id: "5", name: "Boxes" },
-  ]);
+
 
   // State for stock items
   const [stockItems, setStockItems] = useState<StockItem[]>([
@@ -74,7 +65,7 @@ const CreateStocks: React.FC = () => {
 
   // Function to generate unique ID
   const generateId = () => {
-    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    return Date.now().toString() + Math.random().toString(36).substring(2, 11);
   };
 
   // Function to calculate total
@@ -178,8 +169,8 @@ const CreateStocks: React.FC = () => {
           sx={{
             mb: 3,
             fontWeight: "bold",
-            color: "primary.main",
-            backgroundColor: "#e3f2fd",
+            color: "black",
+            backgroundColor: "#D9E1FA",
             py: 2,
             borderRadius: 1,
           }}
@@ -244,7 +235,7 @@ const CreateStocks: React.FC = () => {
                       }
                       placeholder="0"
                       variant="outlined"
-                      inputProps={{ min: 0 }}
+                      slotProps={{ htmlInput: { min: 0 } }}
                     />
                   </TableCell>
                   <TableCell>
@@ -268,24 +259,16 @@ const CreateStocks: React.FC = () => {
                     </FormControl>
                   </TableCell>
                   <TableCell>
-                    <FormControl fullWidth size="small">
-                      <Select
-                        value={item.unit}
-                        onChange={(e) =>
-                          handleInputChange(item.id, "unit", e.target.value)
-                        }
-                        displayEmpty
-                      >
-                        <MenuItem value="">
-                          <em>Select unit</em>
-                        </MenuItem>
-                        {units.map((unit) => (
-                          <MenuItem key={unit.id} value={unit.name}>
-                            {unit.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={item.unit}
+                      onChange={(e) =>
+                        handleInputChange(item.id, "unit", e.target.value)
+                      }
+                      placeholder="Enter unit"
+                      variant="outlined"
+                    />
                   </TableCell>
                   <TableCell>
                     <TextField
@@ -302,7 +285,7 @@ const CreateStocks: React.FC = () => {
                       }
                       placeholder="0.00"
                       variant="outlined"
-                      inputProps={{ min: 0, step: 0.01 }}
+                      slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
                     />
                   </TableCell>
                   <TableCell>
@@ -311,8 +294,10 @@ const CreateStocks: React.FC = () => {
                       size="small"
                       value={item.total.toFixed(2)}
                       variant="outlined"
-                      InputProps={{
-                        readOnly: true,
+                      slotProps={{
+                        input: {
+                          readOnly: true,
+                        },
                       }}
                       sx={{
                         "& .MuiInputBase-input": {
