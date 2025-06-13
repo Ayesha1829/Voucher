@@ -8,6 +8,7 @@ import {
   Select,
   MenuItem,
   FormControl,
+  InputLabel,
   Table,
   TableBody,
   TableCell,
@@ -15,6 +16,7 @@ import {
   TableHead,
   TableRow,
   IconButton,
+  Card,
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
@@ -159,38 +161,224 @@ const CreateStocks: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
-      {/* Header */}
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+    <Box sx={{
+      width: '100%',
+      mx: "auto",
+      overflow: 'hidden'
+    }}>
+      {/* Main Content Container */}
+      <Box sx={{ width: '100%', mx: 'auto' }}>
+        <Paper elevation={3} sx={{
+          p: { xs: 2, sm: 2, md: 3 },
+          m: 0,
+          borderRadius: 0,
+          width: '100%'
+        }}>
         <Typography
           variant="h4"
           component="h1"
           align="center"
           sx={{
-            mb: 3,
+            mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "black",
             backgroundColor: "#D9E1FA",
-            py: 2,
+            py: { xs: 1.5, md: 2 },
+            px: { xs: 1, md: 0 },
             borderRadius: 1,
+            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' }
           }}
         >
           Create Stocks
         </Typography>
 
-        {/* Stock Items Table */}
-        <TableContainer component={Paper} variant="outlined">
+        {/* Stock Items - Mobile Card Layout */}
+        <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 3 }}>
+          {stockItems.map((item, index) => (
+            <Card key={item.id} sx={{ mb: 2, p: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>
+                  Item #{index + 1}
+                </Typography>
+                <IconButton
+                  color="error"
+                  onClick={() => removeRow(item.id)}
+                  disabled={stockItems.length === 1}
+                  size="small"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Item Name"
+                  size="small"
+                  value={item.itemName}
+                  onChange={(e) => handleInputChange(item.id, "itemName", e.target.value)}
+                  placeholder="Enter item name"
+                />
+
+                <TextField
+                  fullWidth
+                  label="Item Code"
+                  size="small"
+                  value={item.itemCode}
+                  onChange={(e) => handleInputChange(item.id, "itemCode", e.target.value)}
+                  placeholder="Enter item code"
+                />
+
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <TextField
+                    fullWidth
+                    label="Quantity"
+                    size="small"
+                    type="number"
+                    value={item.qty || ""}
+                    onChange={(e) => handleInputChange(item.id, "qty", Number(e.target.value))}
+                    placeholder="0"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Unit"
+                    size="small"
+                    value={item.unit}
+                    onChange={(e) => handleInputChange(item.id, "unit", e.target.value)}
+                    placeholder="Unit"
+                  />
+                </Box>
+
+                <FormControl fullWidth size="small">
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    value={item.category}
+                    label="Category"
+                    onChange={(e) => handleInputChange(item.id, "category", e.target.value)}
+                    displayEmpty
+                  >
+                    <MenuItem value="">
+                      <em>Select category</em>
+                    </MenuItem>
+                    {categories.map((category) => (
+                      <MenuItem key={category.id} value={category.name}>
+                        {category.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <TextField
+                    fullWidth
+                    label="Rate"
+                    size="small"
+                    type="number"
+                    value={item.rate || ""}
+                    onChange={(e) => handleInputChange(item.id, "rate", Number(e.target.value))}
+                    placeholder="0.00"
+                    slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Total"
+                    size="small"
+                    value={item.total.toFixed(2)}
+                    slotProps={{ input: { readOnly: true } }}
+                    sx={{
+                      "& .MuiInputBase-input": {
+                        backgroundColor: "#f5f5f5",
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Card>
+          ))}
+        </Box>
+
+        {/* Stock Items Table - Desktop Layout */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <TableContainer
+            component={Paper}
+            variant="outlined"
+            sx={{
+              borderRadius: 2,
+              '& .MuiTableCell-root': {
+                padding: '16px',
+                fontSize: '1rem'
+              },
+              '& .MuiTableCell-head': {
+                fontSize: '0.875rem',
+                fontWeight: 'bold',
+                backgroundColor: '#f5f5f5'
+              }
+            }}
+          >
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell sx={{ fontWeight: "bold" }}>Item Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Item Code</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>QTY</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Category</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Unit</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Rate</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Total</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
+                <TableCell sx={{
+                  fontWeight: "bold",
+                  minWidth: { xs: '90px', sm: '120px', md: 'auto' },
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' }
+                }}>
+                  <Box sx={{ display: { xs: 'none', sm: 'block' } }}>Item Name</Box>
+                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>Item</Box>
+                </TableCell>
+                <TableCell sx={{
+                  fontWeight: "bold",
+                  minWidth: { xs: '80px', sm: '100px', md: 'auto' },
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' }
+                }}>
+                  <Box sx={{ display: { xs: 'none', sm: 'block' } }}>Item Code</Box>
+                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>Code</Box>
+                </TableCell>
+                <TableCell sx={{
+                  fontWeight: "bold",
+                  minWidth: { xs: '60px', sm: '70px', md: 'auto' },
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' }
+                }}>
+                  QTY
+                </TableCell>
+                <TableCell sx={{
+                  fontWeight: "bold",
+                  minWidth: { xs: '90px', sm: '120px', md: 'auto' },
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' }
+                }}>
+                  <Box sx={{ display: { xs: 'none', sm: 'block' } }}>Category</Box>
+                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>Cat.</Box>
+                </TableCell>
+                <TableCell sx={{
+                  fontWeight: "bold",
+                  minWidth: { xs: '60px', sm: '80px', md: 'auto' },
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' }
+                }}>
+                  Unit
+                </TableCell>
+                <TableCell sx={{
+                  fontWeight: "bold",
+                  minWidth: { xs: '70px', sm: '90px', md: 'auto' },
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' }
+                }}>
+                  Rate
+                </TableCell>
+                <TableCell sx={{
+                  fontWeight: "bold",
+                  minWidth: { xs: '70px', sm: '90px', md: 'auto' },
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' }
+                }}>
+                  Total
+                </TableCell>
+                <TableCell sx={{
+                  fontWeight: "bold",
+                  minWidth: { xs: '60px', sm: '80px', md: 'auto' },
+                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' }
+                }}>
+                  <Box sx={{ display: { xs: 'none', sm: 'block' } }}>Actions</Box>
+                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>Act.</Box>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -206,6 +394,15 @@ const CreateStocks: React.FC = () => {
                       }
                       placeholder="Enter item name"
                       variant="outlined"
+                      sx={{
+                        minWidth: { xs: '90px', sm: '140px', md: 'auto' },
+                        '& .MuiInputBase-input': {
+                          fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' }
+                        },
+                        '& .MuiInputBase-input::placeholder': {
+                          fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' }
+                        }
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -216,8 +413,17 @@ const CreateStocks: React.FC = () => {
                       onChange={(e) =>
                         handleInputChange(item.id, "itemCode", e.target.value)
                       }
-                      placeholder="Enter item code"
+                      placeholder="Item code"
                       variant="outlined"
+                      sx={{
+                        minWidth: { xs: '80px', sm: '120px', md: 'auto' },
+                        '& .MuiInputBase-input': {
+                          fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' }
+                        },
+                        '& .MuiInputBase-input::placeholder': {
+                          fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' }
+                        }
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -236,10 +442,26 @@ const CreateStocks: React.FC = () => {
                       placeholder="0"
                       variant="outlined"
                       slotProps={{ htmlInput: { min: 0 } }}
+                      sx={{
+                        minWidth: { xs: '50px', sm: '70px', md: 'auto' },
+                        '& .MuiInputBase-input': {
+                          fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
+                          textAlign: 'center'
+                        }
+                      }}
                     />
                   </TableCell>
                   <TableCell>
-                    <FormControl fullWidth size="small">
+                    <FormControl
+                      fullWidth
+                      size="small"
+                      sx={{
+                        minWidth: { xs: '90px', sm: '140px', md: 'auto' },
+                        '& .MuiSelect-select': {
+                          fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' }
+                        }
+                      }}
+                    >
                       <Select
                         value={item.category}
                         onChange={(e) =>
@@ -266,8 +488,17 @@ const CreateStocks: React.FC = () => {
                       onChange={(e) =>
                         handleInputChange(item.id, "unit", e.target.value)
                       }
-                      placeholder="Enter unit"
+                      placeholder="Unit"
                       variant="outlined"
+                      sx={{
+                        minWidth: { xs: '60px', sm: '90px', md: 'auto' },
+                        '& .MuiInputBase-input': {
+                          fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' }
+                        },
+                        '& .MuiInputBase-input::placeholder': {
+                          fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' }
+                        }
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -286,6 +517,13 @@ const CreateStocks: React.FC = () => {
                       placeholder="0.00"
                       variant="outlined"
                       slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                      sx={{
+                        minWidth: { xs: '60px', sm: '80px', md: 'auto' },
+                        '& .MuiInputBase-input': {
+                          fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
+                          textAlign: 'right'
+                        }
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -300,8 +538,11 @@ const CreateStocks: React.FC = () => {
                         },
                       }}
                       sx={{
+                        minWidth: { xs: '60px', sm: '80px', md: 'auto' },
                         "& .MuiInputBase-input": {
                           backgroundColor: "#f5f5f5",
+                          fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
+                          textAlign: 'right'
                         },
                       }}
                     />
@@ -312,8 +553,12 @@ const CreateStocks: React.FC = () => {
                       onClick={() => removeRow(item.id)}
                       disabled={stockItems.length === 1}
                       size="small"
+                      sx={{
+                        minWidth: { xs: '32px', md: 'auto' },
+                        padding: { xs: '4px', md: '8px' }
+                      }}
                     >
-                      <DeleteIcon />
+                      <DeleteIcon sx={{ fontSize: { xs: '16px', md: '20px' } }} />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -321,14 +566,18 @@ const CreateStocks: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        </Box>
 
         {/* Action Buttons */}
         <Box
           sx={{
-            mt: 3,
+            mt: { xs: 2, md: 3 },
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent: { xs: "center", sm: "space-between" },
             alignItems: "center",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 0 },
+            px: { xs: 1, sm: 0 }
           }}
         >
           <Button
@@ -337,6 +586,9 @@ const CreateStocks: React.FC = () => {
             onClick={addNewRow}
             sx={{
               backgroundColor: "#4fc3f7",
+              width: { xs: '100%', sm: 'auto' },
+              minWidth: { xs: '200px', md: 'auto' },
+              py: { xs: 1.5, md: 1 },
               "&:hover": {
                 backgroundColor: "#29b6f6",
               },
@@ -350,15 +602,18 @@ const CreateStocks: React.FC = () => {
             color="success"
             onClick={handleSubmit}
             sx={{
-              px: 4,
-              py: 1,
-              fontSize: "1.1rem",
+              px: { xs: 3, md: 4 },
+              py: { xs: 1.5, md: 1 },
+              fontSize: { xs: "1rem", md: "1.1rem" },
+              width: { xs: '100%', sm: 'auto' },
+              minWidth: { xs: '200px', md: 'auto' },
             }}
           >
             Submit
           </Button>
         </Box>
       </Paper>
+      </Box>
     </Box>
   );
 };

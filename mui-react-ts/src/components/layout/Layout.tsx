@@ -40,18 +40,11 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
 }>(({ theme, open }) => ({
   flexGrow: 1,
   padding: 0,
-  transition: theme.transitions.create('margin', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  marginLeft: `-${drawerWidth}px`,
-  ...(open && {
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: 0,
-  }),
+  margin: 0,
+  width: '100%',
+  marginLeft: 0, // Always keep content at left edge
+  position: 'relative',
+  zIndex: 1,
 }));
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -136,6 +129,8 @@ const Layout: React.FC<LayoutProps> = ({ children, currentSection, onNavigate })
             minHeight: 'calc(100vh - 64px)',
             borderRadius: '0',
             padding: 0,
+            margin: 0,
+            width: '100%',
           }}
         >
           {children}

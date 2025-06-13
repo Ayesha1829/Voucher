@@ -301,30 +301,38 @@ const StocksItemList: React.FC<StockItemListProps> = ({
   return (
     <Box
       sx={{
-        p: 3,
-        maxWidth: 1400,
+        p: { xs: 1, sm: 2, md: 3 },
+        maxWidth: { xs: '100%', md: 1400 },
         mx: "auto",
         color: "white",
         backgroundColor: "#D9E1FA",
+        px: { xs: 0.5, sm: 1, md: 0 }
       }}
     >
       {/* Header */}
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+      <Paper elevation={3} sx={{
+        p: { xs: 1.5, sm: 2, md: 3 },
+        mb: { xs: 1.5, sm: 2, md: 3 },
+        mx: { xs: 0.5, sm: 0.5, md: 0 }
+      }}>
         <Typography
           variant="h4"
           component="h1"
           align="center"
           sx={{
-            mb: 3,
+            mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "black",
             backgroundColor: "#D9E1FA",
-            py: 2,
+            py: { xs: 1.5, md: 2 },
+            px: { xs: 1, md: 0 },
             borderRadius: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 2,
+            gap: { xs: 1, md: 2 },
+            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+            flexDirection: { xs: 'column', sm: 'row' }
           }}
         >
           <InventoryIcon fontSize="large" />
@@ -332,8 +340,17 @@ const StocksItemList: React.FC<StockItemListProps> = ({
         </Typography>
 
         {/* Summary Cards */}
-        <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
-          <Card sx={{ flex: 1, minWidth: 200 }}>
+        <Box sx={{
+          display: "flex",
+          gap: { xs: 1, sm: 2 },
+          mb: { xs: 2, md: 3 },
+          flexWrap: "wrap",
+          justifyContent: { xs: 'center', md: 'flex-start' }
+        }}>
+          <Card sx={{
+            flex: { xs: '1 1 calc(50% - 4px)', sm: '1 1 calc(25% - 12px)', md: 1 },
+            minWidth: { xs: 140, sm: 180, md: 200 }
+          }}>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
                 Total Items
@@ -378,31 +395,44 @@ const StocksItemList: React.FC<StockItemListProps> = ({
         <Divider sx={{ my: 3 }} />
 
         {/* Search and Filter Section */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: { xs: 2, md: 3 } }}>
           <Box
             sx={{
               display: "flex",
-              gap: 2,
+              gap: { xs: 1, sm: 2 },
               flexWrap: "wrap",
               alignItems: "center",
+              justifyContent: { xs: 'center', md: 'flex-start' }
             }}
           >
             <TextField
               placeholder="Search items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                },
               }}
               variant="outlined"
               size="small"
-              sx={{ minWidth: 250, flex: 1 }}
+              sx={{
+                minWidth: { xs: 200, sm: 250 },
+                flex: { xs: '1 1 100%', sm: 1 },
+                mb: { xs: 1, sm: 0 }
+              }}
             />
-            <FormControl size="small" sx={{ minWidth: 150 }}>
+            <FormControl
+              size="small"
+              sx={{
+                minWidth: { xs: 120, sm: 150 },
+                flex: { xs: '1 1 calc(50% - 4px)', sm: 'none' }
+              }}
+            >
               <InputLabel>Category</InputLabel>
               <Select
                 value={categoryFilter}
@@ -417,7 +447,13 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                 ))}
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
+            <FormControl
+              size="small"
+              sx={{
+                minWidth: { xs: 100, sm: 120 },
+                flex: { xs: '1 1 calc(50% - 4px)', sm: 'none' }
+              }}
+            >
               <InputLabel>Status</InputLabel>
               <Select
                 value={statusFilter}
@@ -439,16 +475,119 @@ const StocksItemList: React.FC<StockItemListProps> = ({
           </Box>
         </Box>
 
-        {/* Stock Items Table */}
-        {filteredItems.length === 0 ? (
-          <Alert severity="info" sx={{ mt: 2 }}>
-            No stock items found.{" "}
-            {searchTerm || categoryFilter || statusFilter
-              ? "Try adjusting your filters."
-              : "Add some stock items to get started."}
-          </Alert>
-        ) : (
-          <TableContainer component={Paper} variant="outlined">
+        {/* Stock Items - Mobile Card Layout */}
+        <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 3 }}>
+          {filteredItems.length === 0 ? (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              No stock items found.{" "}
+              {searchTerm || categoryFilter || statusFilter
+                ? "Try adjusting your filters."
+                : "Add some stock items to get started."}
+            </Alert>
+          ) : (
+            filteredItems.map((item) => (
+              <Card key={item.id} sx={{ mb: 2, p: 2, borderRadius: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
+                      {item.itemName}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
+                      Code: {item.itemCode}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <Tooltip title="View Details">
+                      <IconButton size="small" color="primary" onClick={() => onView?.(item)}>
+                        <ViewIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Edit Item">
+                      <IconButton size="small" color="secondary" onClick={() => handleEditClick(item)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Item">
+                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(item.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="textSecondary">Category:</Typography>
+                    <Chip label={item.category} size="small" variant="outlined" sx={{ fontSize: '0.75rem' }} />
+                  </Box>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="textSecondary">Status:</Typography>
+                    <Chip
+                      label={item.status || "Active"}
+                      size="small"
+                      color={getStatusColor(item.status || "Active") as any}
+                      sx={{ fontSize: '0.75rem' }}
+                    />
+                  </Box>
+
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mt: 1 }}>
+                    <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#f8f9fa', borderRadius: 1 }}>
+                      <Typography variant="caption" color="textSecondary">Quantity</Typography>
+                      <Typography variant="body2" fontWeight="bold">{item.qty}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#f8f9fa', borderRadius: 1 }}>
+                      <Typography variant="caption" color="textSecondary">Unit</Typography>
+                      <Typography variant="body2" fontWeight="bold">{item.unit}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#f8f9fa', borderRadius: 1 }}>
+                      <Typography variant="caption" color="textSecondary">Rate</Typography>
+                      <Typography variant="body2" fontWeight="bold">${item.rate.toFixed(2)}</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
+                      <Typography variant="caption" color="textSecondary">Total</Typography>
+                      <Typography variant="body2" fontWeight="bold" color="success.main">${item.total.toFixed(2)}</Typography>
+                    </Box>
+                  </Box>
+
+                  {item.dateAdded && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, pt: 1, borderTop: '1px solid #e0e0e0' }}>
+                      <Typography variant="caption" color="textSecondary">
+                        Added: {item.dateAdded}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Card>
+            ))
+          )}
+        </Box>
+
+        {/* Stock Items Table - Desktop Layout */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          {filteredItems.length === 0 ? (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              No stock items found.{" "}
+              {searchTerm || categoryFilter || statusFilter
+                ? "Try adjusting your filters."
+                : "Add some stock items to get started."}
+            </Alert>
+          ) : (
+            <TableContainer
+              component={Paper}
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                '& .MuiTableCell-root': {
+                  padding: '16px',
+                  fontSize: '0.875rem'
+                },
+                '& .MuiTableCell-head': {
+                  fontSize: '0.875rem',
+                  fontWeight: 'bold'
+                }
+              }}
+            >
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
@@ -563,7 +702,8 @@ const StocksItemList: React.FC<StockItemListProps> = ({
               </TableBody>
             </Table>
           </TableContainer>
-        )}
+          )}
+        </Box>
 
         {/* Edit Dialog */}
         <Dialog
@@ -571,6 +711,13 @@ const StocksItemList: React.FC<StockItemListProps> = ({
           onClose={handleEditCancel}
           maxWidth="md"
           fullWidth
+          sx={{
+            '& .MuiDialog-paper': {
+              margin: { xs: 1, sm: 2 },
+              maxHeight: { xs: '95vh', sm: '90vh' },
+              width: { xs: '95vw', sm: 'auto' }
+            }
+          }}
         >
           <DialogTitle>Edit Stock Item</DialogTitle>
           <DialogContent>

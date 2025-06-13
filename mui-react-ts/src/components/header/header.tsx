@@ -135,7 +135,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
         </LogoContainer>
 
         {/* Navigation Menu */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+        <Box sx={{
+          display: { xs: 'none', md: 'flex' },
+          alignItems: 'center',
+          gap: { md: 2, lg: 3 },
+          flexWrap: 'wrap'
+        }}>
           {/* Purchase Voucher */}
           <NavButton onClick={() => onNavigate('purchase-voucher')}>
             Purchase Voucher
@@ -202,6 +207,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             onClick={handleLanguageClick}
             sx={{
               color: '#333',
+              display: { xs: 'none', sm: 'flex' },
               '&:hover': {
                 backgroundColor: '#B8C5F2',
               },
@@ -259,7 +265,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
           </IconButton>
 
           {/* User Info */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <Box sx={{
+            display: { xs: 'none', sm: 'flex' },
+            flexDirection: 'column',
+            alignItems: 'flex-end'
+          }}>
             <Typography variant="body2" sx={{ color: '#333', fontWeight: '500' }}>
               devinc
             </Typography>

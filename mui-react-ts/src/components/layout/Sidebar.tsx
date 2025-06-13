@@ -45,6 +45,7 @@ const StyledDrawer = styled(Drawer)(() => ({
     borderRight: '2px solid #D9E1FA',
     top: '64px', // Position below header
     height: 'calc(100vh - 64px)', // Adjust height for header
+    zIndex: 1300, // Higher z-index to overlay content
   },
 }));
 
@@ -207,9 +208,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onNavigate, currentSec
 
   return (
     <StyledDrawer
-      variant="persistent"
+      variant="temporary"
       anchor="left"
       open={open}
+      onClose={onClose}
+      ModalProps={{
+        keepMounted: true, // Better open performance on mobile
+      }}
     >
       {/* Header */}
       <SidebarHeader>

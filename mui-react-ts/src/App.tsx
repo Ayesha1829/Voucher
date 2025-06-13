@@ -7,6 +7,8 @@ import Layout from './components/layout/Layout';
 import AddCategory from './components/inventory/addCategory';
 import CreateStocks from './components/inventory/addStock';
 import StocksItemList from './components/inventory/stocksItemList';
+import PurchaseVoucher from './components/voucher/purchaseVoucher';
+import SalesVoucher from './components/voucher/salesVoucher';
 import './App.css';
 
 // Create a custom theme
@@ -61,11 +63,7 @@ function App() {
           </div>
         );
       case 'purchase-voucher':
-        return (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Purchase Voucher - Coming Soon</h2>
-          </div>
-        );
+        return <PurchaseVoucher />;
       case 'purchase-return':
         return (
           <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -73,11 +71,7 @@ function App() {
           </div>
         );
       case 'sales-voucher':
-        return (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Sales Voucher - Coming Soon</h2>
-          </div>
-        );
+        return <SalesVoucher />;
       case 'sales-return':
         return (
           <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -94,18 +88,6 @@ function App() {
         return (
           <div style={{ padding: '20px', textAlign: 'center' }}>
             <h2>Cash Voucher - Coming Soon</h2>
-          </div>
-        );
-      case 'purchase-voucher':
-        return (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Purchase Voucher - Coming Soon</h2>
-          </div>
-        );
-      case 'sale-voucher':
-        return (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Sale Voucher - Coming Soon</h2>
           </div>
         );
       case 'reports':
