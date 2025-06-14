@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Box } from "@mui/material";
@@ -11,6 +11,8 @@ import PurchaseVoucher from "./components/voucher/purchaseVoucher";
 import PurchaseReturnList from "./components/voucher/purchaseReturnList";
 import SalesVoucher from "./components/voucher/salesVoucher";
 import SalesReturnList from "./components/voucher/salesReturnList";
+import Login from "./components/auth/Login";
+import Dashboard from "./components/dashboard/Dashboard";
 import "./App.css";
 
 // Create a custom theme
@@ -33,9 +35,38 @@ const theme = createTheme({
 
 function App() {
   const [currentSection, setCurrentSection] = useState<string>("add-category");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setCheckingAuth(false);
+      setIsAuthenticated(false);
+      return;
+    }
+    // Verify token with backend
+    fetch("http://localhost:5000/api/users/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then(() => {
+        setIsAuthenticated(true);
+        setCheckingAuth(false);
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+        setIsAuthenticated(false);
+        setCheckingAuth(false);
+      });
+  }, []);
 
   const handleNavigate = (section: string) => {
     setCurrentSection(section);
+  };
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
   };
 
   const renderContent = () => {
@@ -43,11 +74,7 @@ function App() {
       case "add-category":
         return <AddCategory />;
       case "dashboard":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Dashboard - Coming Soon</h2>
-          </div>
-        );
+        return <Dashboard />;
       case "add-stock":
         return <CreateStocks />;
       case "stock-list":
@@ -112,6 +139,21 @@ function App() {
         return <AddCategory />;
     }
   };
+
+  if (checkingAuth) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Login
+        onLoginSuccess={() => {
+          setIsAuthenticated(true);
+          setCurrentSection("dashboard"); // Navigate to dashboard after login
+        }}
+      />
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>
