@@ -7,12 +7,20 @@ import Layout from "./components/layout/Layout";
 import AddCategory from "./components/inventory/addCategory";
 import CreateStocks from "./components/inventory/addStock";
 import StocksItemList from "./components/inventory/stocksItemList";
+import StockSummary from "./components/inventory/stockSummary";
+import NilStocks from "./components/inventory/nilStocks";
 import PurchaseVoucher from "./components/voucher/purchaseVoucher";
 import PurchaseReturnList from "./components/voucher/purchaseReturnList";
+import EntryPurchaseReturn from "./components/voucher/entryPurchaseReturn";
+import EntrySalesReturn from "./components/voucher/entrySalesReturn";
 import SalesVoucher from "./components/voucher/salesVoucher";
 import SalesReturnList from "./components/voucher/salesReturnList";
+import ViewPurchaseVoucher from "./components/voucher/viewPurchaseVoucher";
+import ViewSalesVoucher from "./components/voucher/viewSalesVoucher";
+import VoidPurchaseVoucher from "./components/voucher/voidPurchaseVoucher";
+import VoidSalesVoucher from "./components/voucher/voidSalesVoucher";
+import VoidSalesReturn from "./components/voucher/voidSalesReturn";
 import Login from "./components/auth/Login";
-import Dashboard from "./components/dashboard/Dashboard";
 import "./App.css";
 
 // Create a custom theme
@@ -34,7 +42,7 @@ const theme = createTheme({
 });
 
 function App() {
-  const [currentSection, setCurrentSection] = useState<string>("add-category");
+  const [currentSection, setCurrentSection] = useState<string>("dashboard");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
 
@@ -74,55 +82,45 @@ function App() {
       case "add-category":
         return <AddCategory />;
       case "dashboard":
-        return <Dashboard />;
+        return (
+          <div style={{ padding: "20px", textAlign: "center" }}>
+            <h2>Dashboard - Coming Soon</h2>
+          </div>
+        );
       case "add-stock":
         return <CreateStocks />;
       case "stock-list":
         return <StocksItemList />;
       case "stock-summary":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Stock Summary - Coming Soon</h2>
-          </div>
-        );
+        return <StockSummary />;
       case "nil-stocks":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Nil Stocks - Coming Soon</h2>
-          </div>
-        );
+        return <NilStocks />;
       case "purchase-voucher":
         return <PurchaseVoucher />;
+      case "view-purchase-voucher":
+        return <ViewPurchaseVoucher />;
       case "void-purchase-voucher":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Void Purchase Voucher - Coming Soon</h2>
-          </div>
-        );
+        return <VoidPurchaseVoucher />;
+      case "entry-purchase-return":
+        return <EntryPurchaseReturn />;
       case "purchase-return-list":
         return <PurchaseReturnList />;
+      case "view-purchase-return":
+        return <PurchaseReturnList />;
       case "void-purchase-return":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Void Purchase Return - Coming Soon</h2>
-          </div>
-        );
-      case "sales-return-list":
+        return <VoidPurchaseVoucher />;
+      case "entry-sales-return":
+        return <EntrySalesReturn />;
+      case "view-sales-return":
         return <SalesReturnList />;
       case "void-sales-return":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Void Sales Return - Coming Soon</h2>
-          </div>
-        );
+        return <VoidSalesReturn />;
       case "sales-voucher":
         return <SalesVoucher />;
+      case "view-sales-voucher":
+        return <ViewSalesVoucher />;
       case "void-sales-voucher":
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <h2>Void Sales Voucher - Coming Soon</h2>
-          </div>
-        );
+        return <VoidSalesVoucher />;
       case "reports":
         return (
           <div style={{ padding: "20px", textAlign: "center" }}>
@@ -141,17 +139,30 @@ function App() {
   };
 
   if (checkingAuth) {
-    return <div>Loading...</div>;
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "100vh",
+            backgroundColor: "#D9E1FA",
+          }}
+        >
+          <div>Loading...</div>
+        </Box>
+      </ThemeProvider>
+    );
   }
 
   if (!isAuthenticated) {
     return (
-      <Login
-        onLoginSuccess={() => {
-          setIsAuthenticated(true);
-          setCurrentSection("dashboard"); // Navigate to dashboard after login
-        }}
-      />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Login onLoginSuccess={handleLoginSuccess} />
+      </ThemeProvider>
     );
   }
 

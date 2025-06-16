@@ -151,7 +151,7 @@ const PurchaseVoucher: React.FC = () => {
   };
 
   // Function to handle form submission
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validate that all required fields are filled
     const isValid =
       voucherDate.trim() !== "" &&
@@ -170,34 +170,63 @@ const PurchaseVoucher: React.FC = () => {
       return;
     }
 
-    // Here you would typically send the data to your backend
-    const voucherData = {
-      date: formatDateToDisplay(voucherDate), // Convert to dd/mm/yyyy for display/storage
-      supplier: selectedSupplier,
-      closingBalance: closingBalance,
-      items: purchaseItems,
-      grandTotal: purchaseItems.reduce((sum, item) => sum + item.total, 0),
-    };
+    try {
+      // Prepare data for backend API
+      const voucherData = {
+        date: formatDateToDisplay(voucherDate), // Convert to dd/mm/yyyy for display/storage
+        supplier: selectedSupplier,
+        items: purchaseItems.map(item => ({
+          itemName: item.item,
+          quantity: item.quantity,
+          rate: item.rate,
+          unit: item.unit,
+          category: item.category
+        }))
+      };
 
-    console.log("Purchase voucher data:", voucherData);
-    alert("Purchase voucher saved successfully!");
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/vouchers/purchase', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(voucherData),
+      });
 
-    // Reset form
-    setVoucherDate("");
-    setSelectedSupplier("");
-    setClosingBalance("");
-    setPurchaseItems([
-      {
-        id: generateId(),
-        item: "",
-        category: "",
-        rate: 0,
-        quantity: 0,
-        unit: "",
-        gst: 0,
-        total: 0,
-      },
-    ]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Purchase voucher saved:", result);
+
+      if (result.success) {
+        alert(`Purchase voucher saved successfully! Voucher ID: ${result.data.id}`);
+      } else {
+        throw new Error(result.message || 'Failed to save voucher');
+      }
+
+      // Reset form
+      setVoucherDate("");
+      setSelectedSupplier("");
+      setClosingBalance("");
+      setPurchaseItems([
+        {
+          id: generateId(),
+          item: "",
+          category: "",
+          rate: 0,
+          quantity: 0,
+          unit: "",
+          gst: 0,
+          total: 0,
+        },
+      ]);
+    } catch (error) {
+      console.error('Error saving purchase voucher:', error);
+      alert('Failed to save purchase voucher. Please check if the backend server is running.');
+    }
   };
 
   return (
@@ -225,7 +254,7 @@ const PurchaseVoucher: React.FC = () => {
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#D9E1FA",
+            backgroundColor: "#C68FFD",
             color: "black",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },

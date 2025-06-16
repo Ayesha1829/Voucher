@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Box,
   Paper,
@@ -28,6 +28,7 @@ import {
   DialogActions,
   Button,
   Snackbar,
+  CircularProgress,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -36,20 +37,28 @@ import {
   Visibility as ViewIcon,
   FilterList as FilterIcon,
   Inventory as InventoryIcon,
+  Refresh as RefreshIcon,
 } from "@mui/icons-material";
 
 // Define interfaces for type safety
 interface StockItem {
-  id: string;
+  _id: string;
   itemName: string;
   itemCode: string;
   qty: number;
-  category: string;
+  category: {
+    _id: string;
+    name: string;
+  };
   unit: string;
   rate: number;
   total: number;
-  dateAdded?: string;
-  status?: "Active" | "Low Stock" | "Out of Stock";
+  dateAdded: string;
+  status: "Active" | "Low Stock" | "Out of Stock";
+  minStockLevel: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface StockItemListProps {
@@ -77,9 +86,18 @@ const StocksItemList: React.FC<StockItemListProps> = ({
 
   // State for search and filtering
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [filteredItems, setFilteredItems] = useState<StockItem[]>([]);
+
+  // Debounce search term to improve performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // State for edit functionality
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -96,106 +114,135 @@ const StocksItemList: React.FC<StockItemListProps> = ({
 
   // State for managing stock items internally
   const [internalStockItems, setInternalStockItems] = useState<StockItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<boolean>(false);
 
-  // Sample data for demonstration (in real app, this would come from props or API)
-  const [sampleStockItems] = useState<StockItem[]>([
+  // Fallback sample data (only used when API fails)
+  const fallbackData: StockItem[] = [
     {
-      id: "1",
-      itemName: "Laptop Dell XPS 13",
-      itemCode: "DELL-XPS-001",
-      qty: 15,
-      category: "Electronics",
+      _id: "sample-1",
+      itemName: "Sample Item 1",
+      itemCode: "SAMPLE-001",
+      qty: 10,
+      category: { _id: "cat-1", name: "Sample Category" },
       unit: "Pieces",
-      rate: 1200.0,
-      total: 18000.0,
-      dateAdded: "2024-01-15",
+      rate: 100,
+      total: 1000,
+      dateAdded: new Date().toLocaleDateString('en-GB'),
       status: "Active",
-    },
-    {
-      id: "2",
-      itemName: "Office Chair",
-      itemCode: "CHAIR-001",
-      qty: 3,
-      category: "Furniture",
-      unit: "Pieces",
-      rate: 250.0,
-      total: 750.0,
-      dateAdded: "2024-01-14",
-      status: "Low Stock",
-    },
-    {
-      id: "3",
-      itemName: "Coffee Beans Premium",
-      itemCode: "COFFEE-PREM-001",
-      qty: 0,
-      category: "Food & Beverages",
-      unit: "Kg",
-      rate: 25.0,
-      total: 0.0,
-      dateAdded: "2024-01-13",
-      status: "Out of Stock",
-    },
-    {
-      id: "4",
-      itemName: "Programming Book - React",
-      itemCode: "BOOK-REACT-001",
-      qty: 8,
-      category: "Books",
-      unit: "Pieces",
-      rate: 45.0,
-      total: 360.0,
-      dateAdded: "2024-01-12",
-      status: "Active",
-    },
-    {
-      id: "5",
-      itemName: "Garden Hose 50ft",
-      itemCode: "HOSE-50FT-001",
-      qty: 12,
-      category: "Home & Garden",
-      unit: "Pieces",
-      rate: 35.0,
-      total: 420.0,
-      dateAdded: "2024-01-11",
-      status: "Active",
-    },
-  ]);
+      minStockLevel: 5,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ];
 
-  // Initialize internal stock items with sample data
+  // API base URL
+  const API_BASE_URL = 'http://localhost:5000/api';
+
+  // Fetch stock items from backend with improved error handling
+  const fetchStockItems = useCallback(async () => {
+    try {
+      setLoading(true);
+      setApiError(false);
+
+      console.log('Fetching stock items from:', `${API_BASE_URL}/inventory`);
+
+      const response = await fetch(`${API_BASE_URL}/inventory`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Remove AbortController for now to avoid timeout issues
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (data.success) {
+        const items = data.data?.items || data.data || [];
+        console.log('Setting items:', items.length, 'items');
+        setInternalStockItems(items);
+        setApiError(false);
+
+        if (items.length === 0) {
+          setSnackbarMessage('No stock items found. Add some items to get started!');
+          setSnackbarOpen(true);
+        }
+      } else {
+        console.error('API returned error:', data.message);
+        setApiError(true);
+        setInternalStockItems(fallbackData);
+        setSnackbarMessage('API error - using sample data: ' + (data.message || 'Unknown error'));
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching stock items:', error);
+      setApiError(true);
+      setInternalStockItems(fallbackData);
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          setSnackbarMessage('Request was cancelled - using sample data');
+        } else if (error.message.includes('fetch')) {
+          setSnackbarMessage('Cannot connect to server - using sample data');
+        } else {
+          setSnackbarMessage(`Connection error: ${error.message} - using sample data`);
+        }
+      } else {
+        setSnackbarMessage('Unknown error - using sample data');
+      }
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [API_BASE_URL]);
+
+  // Initialize stock items - fetch from API or use props
   useEffect(() => {
     if (stockItems.length > 0) {
       setInternalStockItems(stockItems);
     } else {
-      setInternalStockItems(sampleStockItems);
+      fetchStockItems();
     }
-  }, [stockItems, sampleStockItems]);
+  }, [stockItems]);
 
   // Use internal stock items for display
   const displayItems = internalStockItems;
 
-  // Get unique categories for filter dropdown
-  const categories = Array.from(
-    new Set(displayItems.map((item) => item.category))
-  );
+  // Get unique categories for filter dropdown - memoized
+  const categories = useMemo(() => {
+    return Array.from(
+      new Set(displayItems.map((item) => item.category?.name).filter(Boolean))
+    );
+  }, [displayItems]);
+
   const statuses = ["Active", "Low Stock", "Out of Stock"];
 
-  // Filter items based on search term and filters
-  useEffect(() => {
+  // Filter items based on search term and filters - memoized with debounced search
+  const filteredItems = useMemo(() => {
     let filtered = displayItems;
 
-    // Apply search filter
-    if (searchTerm) {
+    // Apply search filter with debounced search term
+    if (debouncedSearchTerm) {
+      const searchLower = debouncedSearchTerm.toLowerCase();
       filtered = filtered.filter(
         (item) =>
-          item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.itemCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.category.toLowerCase().includes(searchTerm.toLowerCase())
+          item.itemName.toLowerCase().includes(searchLower) ||
+          item.itemCode.toLowerCase().includes(searchLower) ||
+          (item.category?.name && item.category.name.toLowerCase().includes(searchLower))
       );
     }
 
     // Apply category filter
     if (categoryFilter) {
-      filtered = filtered.filter((item) => item.category === categoryFilter);
+      filtered = filtered.filter((item) => item.category?.name === categoryFilter);
     }
 
     // Apply status filter
@@ -203,18 +250,29 @@ const StocksItemList: React.FC<StockItemListProps> = ({
       filtered = filtered.filter((item) => item.status === statusFilter);
     }
 
-    setFilteredItems(filtered);
-  }, [searchTerm, categoryFilter, statusFilter, displayItems]);
+    return filtered;
+  }, [debouncedSearchTerm, categoryFilter, statusFilter, displayItems]);
 
-  // Calculate summary statistics
-  const totalItems = filteredItems.length;
-  const totalValue = filteredItems.reduce((sum, item) => sum + item.total, 0);
-  const lowStockItems = filteredItems.filter(
-    (item) => item.status === "Low Stock"
-  ).length;
-  const outOfStockItems = filteredItems.filter(
-    (item) => item.status === "Out of Stock"
-  ).length;
+  // Calculate summary statistics - memoized
+  const summaryStats = useMemo(() => {
+    const totalItems = filteredItems.length;
+    const totalValue = filteredItems.reduce((sum, item) => sum + item.total, 0);
+    const lowStockItems = filteredItems.filter(
+      (item) => item.status === "Low Stock"
+    ).length;
+    const outOfStockItems = filteredItems.filter(
+      (item) => item.status === "Out of Stock"
+    ).length;
+
+    return {
+      totalItems,
+      totalValue,
+      lowStockItems,
+      outOfStockItems
+    };
+  }, [filteredItems]);
+
+  const { totalItems, totalValue, lowStockItems, outOfStockItems } = summaryStats;
 
   // Get status chip color
   const getStatusColor = (status: string) => {
@@ -267,7 +325,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
     if (editFormData && editingItem) {
       setInternalStockItems((prevItems) =>
         prevItems.map((item) =>
-          item.id === editingItem.id ? editFormData : item
+          item._id === editingItem._id ? editFormData : item
         )
       );
       setEditDialogOpen(false);
@@ -287,7 +345,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
   const handleDeleteConfirm = () => {
     if (itemToDelete) {
       setInternalStockItems((prevItems) =>
-        prevItems.filter((item) => item.id !== itemToDelete)
+        prevItems.filter((item) => item._id !== itemToDelete)
       );
       setDeleteDialogOpen(false);
       setItemToDelete(null);
@@ -329,29 +387,51 @@ const StocksItemList: React.FC<StockItemListProps> = ({
         mx: { xs: 0, md: 0 },
         width: '100%'
       }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          align="center"
-          sx={{
-            mb: { xs: 2, md: 3 },
-            fontWeight: "bold",
-            color: "black",
-            backgroundColor: "#D9E1FA",
-            py: { xs: 1.5, md: 2 },
-            px: { xs: 1, md: 0 },
-            borderRadius: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: { xs: 1, md: 2 },
-            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
-            flexDirection: { xs: 'column', sm: 'row' }
-          }}
-        >
-          <InventoryIcon fontSize="large" />
-          Stock Items List
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, md: 3 } }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              fontWeight: "bold",
+              color: "black",
+              backgroundColor: "#C68FFD",
+              py: { xs: 1.5, md: 2 },
+              px: { xs: 2, md: 3 },
+              borderRadius: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 1, md: 2 },
+              fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+              flexDirection: { xs: 'column', sm: 'row' },
+              flex: 1
+            }}
+          >
+            <InventoryIcon fontSize="large" />
+            Stock Items List
+          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {apiError && (
+              <Chip
+                label="Sample Data"
+                color="warning"
+                size="small"
+                sx={{ fontSize: '0.75rem' }}
+              />
+            )}
+            <IconButton
+              onClick={fetchStockItems}
+              disabled={loading}
+              color="primary"
+              sx={{
+                backgroundColor: '#D9E1FA',
+                '&:hover': { backgroundColor: '#B8C5F2' }
+              }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Box>
+        </Box>
 
         {/* Summary Cards */}
         <Box sx={{
@@ -369,9 +449,13 @@ const StocksItemList: React.FC<StockItemListProps> = ({
               <Typography color="textSecondary" gutterBottom sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Total Items
               </Typography>
-              <Typography variant="h5" component="div" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-                {totalItems}
-              </Typography>
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : (
+                <Typography variant="h5" component="div" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
+                  {totalItems}
+                </Typography>
+              )}
             </CardContent>
           </Card>
           <Card sx={{
@@ -382,9 +466,13 @@ const StocksItemList: React.FC<StockItemListProps> = ({
               <Typography color="textSecondary" gutterBottom sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Total Value
               </Typography>
-              <Typography variant="h5" component="div" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-                ${totalValue.toFixed(2)}
-              </Typography>
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : (
+                <Typography variant="h5" component="div" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
+                  ${totalValue.toFixed(2)}
+                </Typography>
+              )}
             </CardContent>
           </Card>
           <Card sx={{
@@ -395,9 +483,13 @@ const StocksItemList: React.FC<StockItemListProps> = ({
               <Typography color="textSecondary" gutterBottom sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Low Stock
               </Typography>
-              <Typography variant="h5" component="div" color="warning.main" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-                {lowStockItems}
-              </Typography>
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : (
+                <Typography variant="h5" component="div" color="warning.main" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
+                  {lowStockItems}
+                </Typography>
+              )}
             </CardContent>
           </Card>
           <Card sx={{
@@ -408,9 +500,13 @@ const StocksItemList: React.FC<StockItemListProps> = ({
               <Typography color="textSecondary" gutterBottom sx={{ fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Out of Stock
               </Typography>
-              <Typography variant="h5" component="div" color="error.main" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-                {outOfStockItems}
-              </Typography>
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : (
+                <Typography variant="h5" component="div" color="error.main" sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
+                  {outOfStockItems}
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -500,7 +596,12 @@ const StocksItemList: React.FC<StockItemListProps> = ({
 
         {/* Stock Items - Mobile Card Layout */}
         <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 3 }}>
-          {filteredItems.length === 0 ? (
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+              <CircularProgress size={40} />
+              <Typography sx={{ ml: 2 }}>Loading stock items...</Typography>
+            </Box>
+          ) : filteredItems.length === 0 ? (
             <Alert severity="info" sx={{ mt: 2 }}>
               No stock items found.{" "}
               {searchTerm || categoryFilter || statusFilter
@@ -509,7 +610,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
             </Alert>
           ) : (
             filteredItems.map((item) => (
-              <Card key={item.id} sx={{ mb: 2, p: 2, borderRadius: 2 }}>
+              <Card key={item._id} sx={{ mb: 2, p: 2, borderRadius: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box>
                     <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
@@ -531,7 +632,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete Item">
-                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(item.id)}>
+                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(item._id)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -541,7 +642,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body2" color="textSecondary">Category:</Typography>
-                    <Chip label={item.category} size="small" variant="outlined" sx={{ fontSize: '0.75rem' }} />
+                    <Chip label={item.category?.name || 'N/A'} size="small" variant="outlined" sx={{ fontSize: '0.75rem' }} />
                   </Box>
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -627,9 +728,28 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredItems.map((item) => (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={10} sx={{ textAlign: 'center', py: 4 }}>
+                      <CircularProgress size={40} />
+                      <Typography sx={{ mt: 2 }}>Loading stock items...</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredItems.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography color="textSecondary">
+                        No stock items found.{" "}
+                        {searchTerm || categoryFilter || statusFilter
+                          ? "Try adjusting your filters."
+                          : "Add some stock items to get started."}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredItems.map((item) => (
                   <TableRow
-                    key={item.id}
+                    key={item._id}
                     sx={{
                       "&:hover": { backgroundColor: "#f9f9f9" },
                       backgroundColor:
@@ -652,7 +772,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={item.category}
+                        label={item.category?.name || 'N/A'}
                         size="small"
                         variant="outlined"
                         sx={{ fontSize: "0.75rem" }}
@@ -713,15 +833,16 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                           <IconButton
                             size="small"
                             color="error"
-                            onClick={() => handleDeleteClick(item.id)}
+                            onClick={() => handleDeleteClick(item._id)}
                           >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </Box>
                     </TableCell>
-                  </TableRow>
-                ))}
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -768,7 +889,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
                   <FormControl sx={{ flex: 1, minWidth: 150 }}>
                     <InputLabel>Category</InputLabel>
                     <Select
-                      value={editFormData.category}
+                      value={typeof editFormData.category === 'string' ? editFormData.category : editFormData.category?.name || ''}
                       label="Category"
                       onChange={(e) =>
                         handleEditFormChange("category", e.target.value)

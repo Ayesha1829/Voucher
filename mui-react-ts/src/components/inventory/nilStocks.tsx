@@ -18,160 +18,132 @@ import {
   CircularProgress,
   Card,
   CardContent,
+  Chip,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import {
-  Inventory as InventoryIcon,
+  Warning as WarningIcon,
   Visibility as DetailsIcon,
   Search as SearchIcon,
 } from '@mui/icons-material';
 
-// Interface for Stock Summary Item
-interface StockSummaryItem {
+// Interface for Nil Stock Item
+interface NilStockItem {
   id: string;
+  itemName: string;
   category: string;
-  totalOpeningQty: number;
-  totalPurchasesQty: number;
-  totalPReturnQty: number;
-  totalSoldQty: number;
-  totalSReturnQty: number;
-  totalStockQty: number;
-  totalValue: number;
+  itemCode: string;
+  currentStock: number;
+  lastSoldDate?: string;
+  reorderLevel?: number;
+  status: 'Out of Stock' | 'Critical Low';
 }
 
-interface StockSummaryProps {
-  items?: StockSummaryItem[];
+interface NilStocksProps {
+  items?: NilStockItem[];
   loading?: boolean;
 }
 
-const StockSummary: React.FC<StockSummaryProps> = ({
+const NilStocks: React.FC<NilStocksProps> = ({
   items = [],
   loading = false,
 }) => {
   // Theme and responsive hooks
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // State for search and pagination
   const [searchTerm, setSearchTerm] = useState("");
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredItems, setFilteredItems] = useState<StockSummaryItem[]>([]);
-
+  const [filteredItems, setFilteredItems] = useState<NilStockItem[]>([]);
+  
   // State for API data (placeholder for future implementation)
-  const [apiItems, setApiItems] = useState<StockSummaryItem[]>([]);
+  const [apiItems, setApiItems] = useState<NilStockItem[]>([]);
   const [apiLoading, setApiLoading] = useState(false);
 
   // Sample data for demonstration
-  const [sampleItems] = useState<StockSummaryItem[]>([
+  const [sampleItems] = useState<NilStockItem[]>([
     {
-      id: "26",
-      category: "Crystal White Elastic",
-      totalOpeningQty: 0,
-      totalPurchasesQty: 14093,
-      totalPReturnQty: 0,
-      totalSoldQty: 0,
-      totalSReturnQty: 0,
-      totalStockQty: 14093,
-      totalValue: 535534.00,
+      id: "1",
+      itemName: "Crystal White Elastic Premium",
+      category: "Elastic",
+      itemCode: "CWE001",
+      currentStock: 0,
+      lastSoldDate: "2024-01-15",
+      reorderLevel: 100,
+      status: "Out of Stock",
     },
     {
-      id: "48",
-      category: "Aroma Full Bazoo",
-      totalOpeningQty: 220000,
-      totalPurchasesQty: 0,
-      totalPReturnQty: 0,
-      totalSoldQty: 4480,
-      totalSReturnQty: 0,
-      totalStockQty: 215520,
-      totalValue: 0.00,
+      id: "2",
+      itemName: "Aroma Full Bazoo Large",
+      category: "Aroma",
+      itemCode: "AFB002",
+      currentStock: 0,
+      lastSoldDate: "2024-01-10",
+      reorderLevel: 50,
+      status: "Out of Stock",
     },
     {
-      id: "47",
-      category: "Aroma Full Daraz",
-      totalOpeningQty: 300000,
-      totalPurchasesQty: 0,
-      totalPReturnQty: 0,
-      totalSoldQty: 3266,
-      totalSReturnQty: 0,
-      totalStockQty: 296734,
-      totalValue: 0.00,
+      id: "3",
+      itemName: "Cotton Full Daraz Medium",
+      category: "Cotton",
+      itemCode: "CFD003",
+      currentStock: 0,
+      lastSoldDate: "2024-01-08",
+      reorderLevel: 75,
+      status: "Out of Stock",
     },
     {
-      id: "49",
-      category: "Aroma Half Bazoo",
-      totalOpeningQty: 120000,
-      totalPurchasesQty: 0,
-      totalPReturnQty: 0,
-      totalSoldQty: 24,
-      totalSReturnQty: 0,
-      totalStockQty: 119976,
-      totalValue: 0.00,
+      id: "4",
+      itemName: "B Pair Mix Special",
+      category: "Mix",
+      itemCode: "BPM004",
+      currentStock: 0,
+      lastSoldDate: "2024-01-12",
+      reorderLevel: 25,
+      status: "Out of Stock",
     },
     {
-      id: "37",
-      category: "B Pair Mix",
-      totalOpeningQty: 110000,
-      totalPurchasesQty: 0,
-      totalPReturnQty: 0,
-      totalSoldQty: 5640,
-      totalSReturnQty: 0,
-      totalStockQty: 104360,
-      totalValue: 0.00,
+      id: "5",
+      itemName: "Common Socks Regular",
+      category: "Socks",
+      itemCode: "CSR005",
+      currentStock: 0,
+      lastSoldDate: "2024-01-05",
+      reorderLevel: 200,
+      status: "Out of Stock",
     },
     {
-      id: "59",
-      category: "Common Socks",
-      totalOpeningQty: 10000,
-      totalPurchasesQty: 0,
-      totalPReturnQty: 0,
-      totalSoldQty: 48,
-      totalSReturnQty: 0,
-      totalStockQty: 9952,
-      totalValue: 0.00,
-    },
-    {
-      id: "33",
-      category: "Cotton Full Bazoo",
-      totalOpeningQty: 50000,
-      totalPurchasesQty: 0,
-      totalPReturnQty: 0,
-      totalSoldQty: 108,
-      totalSReturnQty: 0,
-      totalStockQty: 49892,
-      totalValue: 0.00,
-    },
-    {
-      id: "32",
-      category: "Cotton Full Daraz",
-      totalOpeningQty: 50000,
-      totalPurchasesQty: 0,
-      totalPReturnQty: 0,
-      totalSoldQty: 108,
-      totalSReturnQty: 0,
-      totalStockQty: 49892,
-      totalValue: 0.00,
+      id: "6",
+      itemName: "Cozy Warmer Full Bazoo",
+      category: "Warmer",
+      itemCode: "CWF006",
+      currentStock: 0,
+      lastSoldDate: "2024-01-03",
+      reorderLevel: 30,
+      status: "Out of Stock",
     },
   ]);
 
   // Use sample data if no items provided
   const displayItems = apiItems.length > 0 ? apiItems : (items.length > 0 ? items : sampleItems);
 
-  // Fetch stock summary from API (placeholder for future implementation)
-  const fetchStockSummary = async () => {
+  // Fetch nil stocks from API (placeholder for future implementation)
+  const fetchNilStocks = async () => {
     try {
       setApiLoading(true);
-
-      console.log('Fetching stock summary...');
-
-      // TODO: Replace with actual stock summary API when implemented
+      
+      console.log('Fetching nil stocks...');
+      
+      // TODO: Replace with actual nil stocks API when implemented
       // For now, just use sample data
       setApiItems([]);
-
+      
     } catch (error) {
-      console.error('Error fetching stock summary:', error);
+      console.error('Error fetching nil stocks:', error);
       setApiItems([]);
     } finally {
       setApiLoading(false);
@@ -180,7 +152,7 @@ const StockSummary: React.FC<StockSummaryProps> = ({
 
   // Load data on component mount
   useEffect(() => {
-    fetchStockSummary();
+    fetchNilStocks();
   }, []);
 
   // Filter items based on search term
@@ -191,7 +163,9 @@ const StockSummary: React.FC<StockSummaryProps> = ({
       filtered = filtered.filter(
         (item) =>
           item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.category.toLowerCase().includes(searchTerm.toLowerCase())
+          item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.itemCode.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -229,16 +203,6 @@ const StockSummary: React.FC<StockSummaryProps> = ({
     // TODO: Implement details functionality
   };
 
-  // Format number with commas
-  const formatNumber = (num: number) => {
-    return num.toLocaleString();
-  };
-
-  // Format currency
-  const formatCurrency = (num: number) => {
-    return num.toFixed(2);
-  };
-
   return (
     <Box sx={{
       width: { xs: '100%', md: '100vw' },
@@ -267,7 +231,7 @@ const StockSummary: React.FC<StockSummaryProps> = ({
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "black",
-            backgroundColor: "#C68FFD",
+            backgroundColor: "#D9E1FA",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,
@@ -279,9 +243,25 @@ const StockSummary: React.FC<StockSummaryProps> = ({
             flexDirection: { xs: 'column', sm: 'row' }
           }}
         >
-          <InventoryIcon fontSize="large" />
-          Stock Summary
+          <WarningIcon fontSize="large" sx={{ color: '#f44336' }} />
+          Nil Stocks
         </Typography>
+      </Paper>
+
+      {/* Alert Banner */}
+      <Paper elevation={2} sx={{
+        p: 2,
+        mb: 3,
+        backgroundColor: '#fff3cd',
+        border: '1px solid #ffeaa7',
+        borderRadius: 1,
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningIcon sx={{ color: '#856404' }} />
+          <Typography variant="body1" sx={{ color: '#856404', fontWeight: 'bold' }}>
+            Warning: {filteredItems.length} items are currently out of stock and need immediate attention!
+          </Typography>
+        </Box>
       </Paper>
 
       {/* Main Content */}
@@ -338,7 +318,7 @@ const StockSummary: React.FC<StockSummaryProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               sx={{ minWidth: 200 }}
-              placeholder="Search items..."
+              placeholder="Search nil stock items..."
               InputProps={{
                 endAdornment: <SearchIcon sx={{ color: '#666' }} />,
               }}
@@ -357,62 +337,59 @@ const StockSummary: React.FC<StockSummaryProps> = ({
             ) : currentItems.length === 0 ? (
               <Paper sx={{ p: 4, textAlign: "center", backgroundColor: "#f5f5f5" }}>
                 <Typography color="textSecondary">
-                  {searchTerm ? 'No items found matching your search' : 'No stock items found'}
+                  {searchTerm ? 'No nil stock items found matching your search' : 'No nil stock items found - Great! All items are in stock!'}
                 </Typography>
               </Paper>
             ) : (
               currentItems.map((item) => (
-                <Card key={item.id} sx={{ mb: 2, borderRadius: 2 }}>
+                <Card key={item.id} sx={{ mb: 2, borderRadius: 2, border: '2px solid #f44336' }}>
                   <CardContent sx={{ p: 2 }}>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
                       <Box>
-                        <Typography variant="h6" sx={{ color: "#2196F3", fontWeight: "600", fontSize: "1rem" }}>
-                          ID: {item.id}
+                        <Typography variant="h6" sx={{ color: "#f44336", fontWeight: "600", fontSize: "1rem" }}>
+                          {item.itemName}
                         </Typography>
-                        <Typography variant="body1" fontWeight="bold">
-                          {item.category}
+                        <Typography variant="body2" color="textSecondary">
+                          Code: {item.itemCode}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Category: {item.category}
                         </Typography>
                       </Box>
-                      <Button
-                        variant="contained"
+                      <Chip
+                        label="OUT OF STOCK"
+                        color="error"
                         size="small"
-                        startIcon={<DetailsIcon />}
-                        onClick={() => handleDetails(item.id)}
-                        sx={{
-                          backgroundColor: '#FF9800',
-                          '&:hover': { backgroundColor: '#F57C00' },
-                          fontSize: '0.75rem',
-                          px: 1,
-                        }}
-                      >
-                        Details
-                      </Button>
+                        icon={<WarningIcon />}
+                      />
                     </Box>
 
-                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mb: 1 }}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mb: 2 }}>
                       <Typography variant="body2">
-                        <strong>Total Opening:</strong> {formatNumber(item.totalOpeningQty)}
+                        <strong>Current Stock:</strong> <span style={{ color: '#f44336', fontWeight: 'bold' }}>{item.currentStock}</span>
                       </Typography>
                       <Typography variant="body2">
-                        <strong>Total Purchases:</strong> {formatNumber(item.totalPurchasesQty)}
+                        <strong>Reorder Level:</strong> {item.reorderLevel}
                       </Typography>
-                      <Typography variant="body2">
-                        <strong>Total P Return:</strong> {formatNumber(item.totalPReturnQty)}
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Total Sold:</strong> {formatNumber(item.totalSoldQty)}
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Total S Return:</strong> {formatNumber(item.totalSReturnQty)}
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Total Stock:</strong> <span style={{ color: '#f44336', fontWeight: 'bold' }}>{formatNumber(item.totalStockQty)}</span>
+                      <Typography variant="body2" sx={{ gridColumn: '1 / -1' }}>
+                        <strong>Last Sold:</strong> {item.lastSoldDate || 'N/A'}
                       </Typography>
                     </Box>
 
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      <strong>Total Value:</strong> {formatCurrency(item.totalValue)}
-                    </Typography>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<DetailsIcon />}
+                      onClick={() => handleDetails(item.id)}
+                      sx={{
+                        backgroundColor: '#FF9800',
+                        '&:hover': { backgroundColor: '#F57C00' },
+                        fontSize: '0.75rem',
+                        width: '100%',
+                      }}
+                    >
+                      Details In/Out
+                    </Button>
                   </CardContent>
                 </Card>
               ))
@@ -424,30 +401,33 @@ const StockSummary: React.FC<StockSummaryProps> = ({
             <Table sx={{ minWidth: 1200 }}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#C68FFD" }}>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 60 }}>ID</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 200 }}>Category</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 120 }}>Total Opening Qty</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 120 }}>Total Purchases Qty</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 120 }}>Total P Return Qty</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 120 }}>Total Sold Qty</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 120 }}>Total S Return Qty</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 120 }}>Total Stock Qty</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 60 }}>Stock ID</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 200 }}>Item</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 150 }}>Description</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 100 }}>Opening Qty</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 100 }}>Purchased Qty</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 100 }}>P Return Qty</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 100 }}>Sold Qty</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 100 }}>S Return Qty</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 100 }}>Stock Qty</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 80 }}>Unit</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 80 }}>Rate</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 100 }}>Total</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 100 }}>Action</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 120 }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {(loading || apiLoading) ? (
                   <TableRow>
-                    <TableCell colSpan={10} sx={{ textAlign: "center", py: 4 }}>
+                    <TableCell colSpan={13} sx={{ textAlign: "center", py: 4 }}>
                       <CircularProgress size={24} sx={{ mr: 2 }} />
                       Loading...
                     </TableCell>
                   </TableRow>
                 ) : currentItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} sx={{ textAlign: "center", py: 4, color: "#666" }}>
-                      {searchTerm ? 'No items found matching your search' : 'No stock items found'}
+                    <TableCell colSpan={13} sx={{ textAlign: "center", py: 4, color: "#666" }}>
+                      {searchTerm ? 'No nil stock items found matching your search' : 'No nil stock items found - Great! All items are in stock!'}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -455,36 +435,53 @@ const StockSummary: React.FC<StockSummaryProps> = ({
                     <TableRow
                       key={item.id}
                       sx={{
-                        backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
+                        backgroundColor: '#ffebee', // Light red background for out of stock items
+                        '&:hover': { backgroundColor: '#ffcdd2' },
+                        border: '1px solid #f44336',
                       }}
                     >
-                      <TableCell sx={{ fontWeight: "600", color: "#2196F3" }}>
+                      <TableCell sx={{ fontWeight: "600", color: "#f44336" }}>
                         {item.id}
                       </TableCell>
                       <TableCell sx={{ fontWeight: "500" }}>
-                        {item.category}
+                        {item.itemName}
+                      </TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            {item.category}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            Code: {item.itemCode}
+                          </Typography>
+                        </Box>
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {formatNumber(item.totalOpeningQty)}
+                        100
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {formatNumber(item.totalPurchasesQty)}
+                        0
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {formatNumber(item.totalPReturnQty)}
+                        0
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {formatNumber(item.totalSoldQty)}
+                        100
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
-                        {formatNumber(item.totalSReturnQty)}
+                        0
                       </TableCell>
-                      <TableCell sx={{ textAlign: "center", fontWeight: "bold", color: "#f44336" }}>
-                        {formatNumber(item.totalStockQty)}
+                      <TableCell sx={{ textAlign: "center", fontWeight: "bold", color: "#f44336", fontSize: '1.1rem' }}>
+                        {item.currentStock}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        Dozen
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        0.00
                       </TableCell>
                       <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                        {formatCurrency(item.totalValue)}
+                        0.00
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
                         <Button
@@ -499,7 +496,7 @@ const StockSummary: React.FC<StockSummaryProps> = ({
                             fontSize: '0.75rem',
                           }}
                         >
-                          Details
+                          Details In/Out
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -530,4 +527,4 @@ const StockSummary: React.FC<StockSummaryProps> = ({
   );
 };
 
-export default StockSummary;
+export default NilStocks;

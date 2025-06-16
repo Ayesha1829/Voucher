@@ -472,6 +472,204 @@ const applyVoucher = async (req, res) => {
   }
 };
 
+/**
+ * Get purchase vouchers
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
+const getPurchaseVouchers = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const { page: validatedPage, limit: validatedLimit, skip } = validatePagination(page, limit);
+
+    // Find purchase vouchers from database
+    const purchaseVouchers = await Voucher.find({ type: 'purchase' })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(validatedLimit);
+
+    const total = await Voucher.countDocuments({ type: 'purchase' });
+
+    // Format vouchers for frontend
+    const formattedVouchers = purchaseVouchers.map(voucher => ({
+      id: voucher.voucherId,
+      date: voucher.date,
+      items: voucher.items.map(item => ({
+        itemName: item.itemName,
+        quantity: item.quantity,
+        rate: item.rate
+      })),
+      entries: voucher.entries,
+      createdAt: voucher.createdAt,
+      updatedAt: voucher.updatedAt
+    }));
+
+    const paginationMeta = getPaginationMeta(validatedPage, validatedLimit, total);
+
+    res.json(
+      successResponse(
+        'Purchase vouchers retrieved successfully',
+        {
+          vouchers: formattedVouchers,
+          total: total,
+          page: validatedPage,
+          limit: validatedLimit
+        },
+        paginationMeta
+      )
+    );
+  } catch (error) {
+    logger.error('Get purchase vouchers error:', error);
+    res.status(500).json(
+      errorResponse('Failed to retrieve purchase vouchers')
+    );
+  }
+};
+
+/**
+ * Create purchase voucher
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
+const createPurchaseVoucher = async (req, res) => {
+  try {
+    const { date, supplier, items } = req.body;
+
+    // Validate required fields
+    if (!date || !supplier || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json(
+        errorResponse('Missing required fields: date, supplier, and items are required')
+      );
+    }
+
+    // Generate voucher ID
+    const count = await Voucher.countDocuments({ type: 'purchase' });
+    const voucherId = `PV ${(count + 1).toString().padStart(3, '0')}`;
+
+    // Calculate total and entries
+    const total = items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    const entries = items.length;
+
+    // Create voucher
+    const voucher = new Voucher({
+      type: 'purchase',
+      voucherId,
+      date,
+      items,
+      supplier,
+      total,
+      entries,
+      createdBy: req.user?.id || null
+    });
+
+    await voucher.save();
+
+    res.status(201).json(
+      successResponse('Purchase voucher created successfully', {
+        id: voucher.voucherId,
+        date: voucher.date,
+        items: voucher.items,
+        entries: voucher.entries,
+        total: voucher.total
+      })
+    );
+  } catch (error) {
+    logger.error('Create purchase voucher error:', error);
+    res.status(500).json(
+      errorResponse('Failed to create purchase voucher')
+    );
+  }
+};
+
+/**
+ * Get sales vouchers
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
+const getSalesVouchers = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const { page: validatedPage, limit: validatedLimit, skip } = validatePagination(page, limit);
+
+    const salesVouchers = await Voucher.find({ type: 'sales' })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(validatedLimit);
+
+    const total = await Voucher.countDocuments({ type: 'sales' });
+
+    const formattedVouchers = salesVouchers.map(voucher => ({
+      id: voucher.voucherId,
+      date: voucher.date,
+      items: voucher.items,
+      entries: voucher.entries,
+      createdAt: voucher.createdAt,
+      updatedAt: voucher.updatedAt
+    }));
+
+    const paginationMeta = getPaginationMeta(validatedPage, validatedLimit, total);
+
+    res.json(
+      successResponse('Sales vouchers retrieved successfully', {
+        vouchers: formattedVouchers,
+        total: total,
+        page: validatedPage,
+        limit: validatedLimit
+      }, paginationMeta)
+    );
+  } catch (error) {
+    logger.error('Get sales vouchers error:', error);
+    res.status(500).json(
+      errorResponse('Failed to retrieve sales vouchers')
+    );
+  }
+};
+
+/**
+ * Create sales voucher
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
+const createSalesVoucher = async (req, res) => {
+  try {
+    const { date, party, items } = req.body;
+
+    const count = await Voucher.countDocuments({ type: 'sales' });
+    const voucherId = `SV ${(count + 1).toString().padStart(3, '0')}`;
+
+    const total = items.reduce((sum, item) => sum + item.total, 0);
+    const entries = items.length;
+
+    const voucher = new Voucher({
+      type: 'sales',
+      voucherId,
+      date,
+      items,
+      party,
+      total,
+      entries,
+      createdBy: req.user?.id || null
+    });
+
+    await voucher.save();
+
+    res.status(201).json(
+      successResponse('Sales voucher created successfully', {
+        id: voucher.voucherId,
+        date: voucher.date,
+        items: voucher.items,
+        entries: voucher.entries,
+        total: voucher.total
+      })
+    );
+  } catch (error) {
+    logger.error('Create sales voucher error:', error);
+    res.status(500).json(
+      errorResponse('Failed to create sales voucher')
+    );
+  }
+};
+
 module.exports = {
   getAllVouchers,
   getVoucherById,
@@ -479,5 +677,9 @@ module.exports = {
   updateVoucher,
   deleteVoucher,
   validateVoucher,
-  applyVoucher
+  applyVoucher,
+  getPurchaseVouchers,
+  createPurchaseVoucher,
+  getSalesVouchers,
+  createSalesVoucher
 };

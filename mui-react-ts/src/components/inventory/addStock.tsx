@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -17,6 +17,9 @@ import {
   TableRow,
   IconButton,
   Card,
+  CircularProgress,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
@@ -33,21 +36,78 @@ interface StockItem {
 }
 
 interface Category {
-  id: string;
+  _id: string;
   name: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 
 
 const CreateStocks: React.FC = () => {
-  // Sample data for categories and units
-  const [categories] = useState<Category[]>([
-    { id: "1", name: "Electronics" },
-    { id: "2", name: "Clothing" },
-    { id: "3", name: "Food & Beverages" },
-    { id: "4", name: "Books" },
-    { id: "5", name: "Home & Garden" },
-  ]);
+  // State for categories and loading
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning'>('success');
+
+  // API base URL
+  const API_BASE_URL = 'http://localhost:5000/api';
+
+  // Fetch categories from backend
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      console.log('Fetching categories from:', `${API_BASE_URL}/categories`);
+
+      const response = await fetch(`${API_BASE_URL}/categories`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log('Categories response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Categories data:', data);
+
+      if (data.success) {
+        setCategories(data.data || []);
+      } else {
+        showSnackbar('Failed to fetch categories: ' + (data.message || 'Unknown error'), 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      if (error instanceof Error) {
+        showSnackbar('Error fetching categories: ' + error.message, 'error');
+      } else {
+        showSnackbar('Error fetching categories', 'error');
+      }
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
+  // Load categories on component mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Helper function to show snackbar
+  const showSnackbar = (message: string, severity: 'success' | 'error' | 'warning' = 'success') => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
 
 
@@ -124,7 +184,7 @@ const CreateStocks: React.FC = () => {
   };
 
   // Function to handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate that all required fields are filled
     const isValid = stockItems.every(
       (item) =>
@@ -137,27 +197,78 @@ const CreateStocks: React.FC = () => {
     );
 
     if (!isValid) {
-      alert("Please fill in all required fields for all items.");
+      showSnackbar("Please fill in all required fields for all items.", 'error');
       return;
     }
 
-    // Here you would typically send the data to your backend
-    console.log("Stock items to submit:", stockItems);
-    alert("Stock items created successfully!");
+    try {
+      setSaving(true);
 
-    // Reset form
-    setStockItems([
-      {
-        id: generateId(),
-        itemName: "",
-        itemCode: "",
-        qty: 0,
-        category: "",
-        unit: "",
-        rate: 0,
-        total: 0,
-      },
-    ]);
+      const response = await fetch(`${API_BASE_URL}/inventory/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add auth token if available
+          ...(localStorage.getItem('token') && {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          })
+        },
+        body: JSON.stringify({
+          items: stockItems.map(item => ({
+            itemName: item.itemName.trim(),
+            itemCode: item.itemCode.trim(),
+            qty: item.qty,
+            category: item.category,
+            unit: item.unit.trim(),
+            rate: item.rate
+          }))
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const { errors, summary } = data.data;
+
+        if (summary.successfullyCreated > 0) {
+          showSnackbar(
+            `Successfully created ${summary.successfullyCreated} out of ${summary.totalRequested} items!`,
+            'success'
+          );
+        }
+
+        if (errors.length > 0) {
+          console.warn('Some items failed to create:', errors);
+          showSnackbar(
+            `${errors.length} items failed to create. Check console for details.`,
+            'warning'
+          );
+        }
+
+        // Reset form only if at least some items were created successfully
+        if (summary.successfullyCreated > 0) {
+          setStockItems([
+            {
+              id: generateId(),
+              itemName: "",
+              itemCode: "",
+              qty: 0,
+              category: "",
+              unit: "",
+              rate: 0,
+              total: 0,
+            },
+          ]);
+        }
+      } else {
+        showSnackbar(data.message || 'Failed to create stock items', 'error');
+      }
+    } catch (error) {
+      console.error('Error creating stock items:', error);
+      showSnackbar('Error creating stock items', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -190,7 +301,7 @@ const CreateStocks: React.FC = () => {
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "black",
-            backgroundColor: "#D9E1FA",
+            backgroundColor: "#C68FFD",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,
@@ -269,11 +380,22 @@ const CreateStocks: React.FC = () => {
                     <MenuItem value="">
                       <em>Select category</em>
                     </MenuItem>
-                    {categories.map((category) => (
-                      <MenuItem key={category.id} value={category.name}>
-                        {category.name}
+                    {loadingCategories ? (
+                      <MenuItem disabled>
+                        <CircularProgress size={20} sx={{ mr: 1 }} />
+                        Loading categories...
                       </MenuItem>
-                    ))}
+                    ) : categories.length === 0 ? (
+                      <MenuItem disabled>
+                        No categories found
+                      </MenuItem>
+                    ) : (
+                      categories.map((category) => (
+                        <MenuItem key={category._id} value={category._id}>
+                          {category.name}
+                        </MenuItem>
+                      ))
+                    )}
                   </Select>
                 </FormControl>
 
@@ -480,11 +602,22 @@ const CreateStocks: React.FC = () => {
                         <MenuItem value="">
                           <em>Select category</em>
                         </MenuItem>
-                        {categories.map((category) => (
-                          <MenuItem key={category.id} value={category.name}>
-                            {category.name}
+                        {loadingCategories ? (
+                          <MenuItem disabled>
+                            <CircularProgress size={20} sx={{ mr: 1 }} />
+                            Loading categories...
                           </MenuItem>
-                        ))}
+                        ) : categories.length === 0 ? (
+                          <MenuItem disabled>
+                            No categories found
+                          </MenuItem>
+                        ) : (
+                          categories.map((category) => (
+                            <MenuItem key={category._id} value={category._id}>
+                              {category.name}
+                            </MenuItem>
+                          ))
+                        )}
                       </Select>
                     </FormControl>
                   </TableCell>
@@ -609,19 +742,46 @@ const CreateStocks: React.FC = () => {
             variant="contained"
             color="success"
             onClick={handleSubmit}
+            disabled={saving}
             sx={{
               px: { xs: 3, md: 4 },
               py: { xs: 1.5, md: 1 },
               fontSize: { xs: "1rem", md: "1.1rem" },
               width: { xs: '100%', sm: 'auto' },
               minWidth: { xs: '200px', md: 'auto' },
+              "&:disabled": {
+                backgroundColor: "#cccccc",
+              },
             }}
           >
-            Submit
+            {saving ? (
+              <>
+                <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                Saving...
+              </>
+            ) : (
+              'Submit'
+            )}
           </Button>
         </Box>
       </Paper>
       </Box>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

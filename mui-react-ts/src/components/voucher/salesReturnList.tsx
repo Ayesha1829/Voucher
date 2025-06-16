@@ -33,13 +33,14 @@ import {
 // Define interfaces for type safety
 interface SalesReturnVoucher {
   id: string;
+  _id?: string;
   srvId: string;
   dated: string;
   description: string;
   entries: number;
   customerName?: string;
   totalAmount?: number;
-  status?: "Pending" | "Approved" | "Rejected";
+  status?: "Pending" | "Approved" | "Rejected" | "Submitted";
 }
 
 interface SalesReturnListProps {
@@ -65,52 +66,57 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredVouchers, setFilteredVouchers] = useState<SalesReturnVoucher[]>([]);
 
-  // Sample data for demonstration (matching the image)
-  const [sampleVouchers] = useState<SalesReturnVoucher[]>([
-    {
-      id: "1",
-      srvId: "SRV 486",
-      dated: "Wed, 27 Nov 2024",
-      description: "lady went Sale Return Lady went Colour 320 Sale Voucher of 320 -",
-      entries: 1,
-      customerName: "Lady Customer",
-      totalAmount: 320.00,
-      status: "Approved",
-    },
-    {
-      id: "2",
-      srvId: "SRV 487",
-      dated: "Wed, 27 Nov 2024",
-      description: "Lady tried Slim ML Sale Return Lady Brief 319 Sale Voucher of 319",
-      entries: 1,
-      customerName: "Lady Customer",
-      totalAmount: 319.00,
-      status: "Pending",
-    },
-    {
-      id: "3",
-      srvId: "SRV 488",
-      dated: "Thu, 28 Nov 2024",
-      description: "Customer return due to size mismatch - Shirt XL Sale Voucher of 450",
-      entries: 2,
-      customerName: "John Doe",
-      totalAmount: 450.00,
-      status: "Approved",
-    },
-    {
-      id: "4",
-      srvId: "SRV 489",
-      dated: "Thu, 28 Nov 2024",
-      description: "Defective product return - Electronics Sale Voucher of 1200",
-      entries: 1,
-      customerName: "Tech Store",
-      totalAmount: 1200.00,
-      status: "Pending",
-    },
-  ]);
+  // State for API data
+  const [apiVouchers, setApiVouchers] = useState<SalesReturnVoucher[]>([]);
+  const [apiLoading, setApiLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  // Use sample data if no vouchers provided
-  const displayVouchers = vouchers.length > 0 ? vouchers : sampleVouchers;
+  // Use API data if available, otherwise use props
+  const displayVouchers = apiVouchers.length > 0 ? apiVouchers : vouchers;
+
+  // Fetch sales returns from API
+  const fetchSalesReturns = async () => {
+    try {
+      setApiLoading(true);
+      setApiError(null);
+
+      console.log('Fetching sales returns from API...');
+
+      const response = await fetch('http://localhost:5000/api/sales-returns', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Sales returns API response:', result);
+
+      if (result.success) {
+        const items = result.data?.items || result.data || [];
+        console.log('Setting sales returns:', items.length, 'items');
+        setApiVouchers(items);
+      } else {
+        throw new Error(result.message || 'Failed to fetch sales returns');
+      }
+    } catch (error) {
+      console.error('Error fetching sales returns:', error);
+      setApiError(error instanceof Error ? error.message : 'Unknown error');
+      // Don't show error to user, just use empty array
+      setApiVouchers([]);
+    } finally {
+      setApiLoading(false);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchSalesReturns();
+  }, []);
 
   // Filter vouchers based on search term
   useEffect(() => {
@@ -207,7 +213,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
             flexDirection: { xs: 'column', sm: 'row' }
           }}
         >
-          Sale Vouchers List
+          Sales Return List
         </Typography>
       </Paper>
 
@@ -280,7 +286,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
                 }
               }}
               variant="outlined"
-              placeholder="Search vouchers..."
+              placeholder="Search sales returns..."
             />
           </Box>
         </Box>
@@ -288,7 +294,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
         {/* Mobile Card View */}
         {isMobile ? (
           <Box sx={{ mb: 3 }}>
-            {loading ? (
+            {(loading || apiLoading) ? (
               <Box sx={{ textAlign: "center", py: 4 }}>
                 <CircularProgress size={24} sx={{ mr: 2 }} />
                 <Typography>Loading...</Typography>
@@ -327,7 +333,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
                           <ViewIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Print Voucher">
+                      <Tooltip title="Print Sales Return">
                         <IconButton size="small" color="secondary" onClick={() => handlePrint(voucher)}>
                           <PrintIcon fontSize="small" />
                         </IconButton>
@@ -393,7 +399,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {loading ? (
+              {(loading || apiLoading) ? (
                 <TableRow>
                   <TableCell
                     colSpan={5}
@@ -471,7 +477,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
                             <ViewIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Print Voucher">
+                        <Tooltip title="Print Sales Return">
                           <IconButton
                             size="small"
                             color="secondary"

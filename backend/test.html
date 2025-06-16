@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Voucher API Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Server Health</h3>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <div id="health-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Categories</h3>
+        <button onclick="getCategories()">Get Categories</button>
+        <button onclick="createCategory()">Create Test Category</button>
+        <div id="categories-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test Inventory</h3>
+        <button onclick="getInventory()">Get Inventory</button>
+        <button onclick="createInventoryItem()">Create Test Item</button>
+        <div id="inventory-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        function displayResult(elementId, result, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre class="${isError ? 'error' : 'success'}">${JSON.stringify(result, null, 2)}</pre>`;
+        }
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                displayResult('health-result', data);
+            } catch (error) {
+                displayResult('health-result', { error: error.message }, true);
+            }
+        }
+
+        async function getCategories() {
+            try {
+                const response = await fetch(`${API_BASE}/api/categories`);
+                const data = await response.json();
+                displayResult('categories-result', data);
+            } catch (error) {
+                displayResult('categories-result', { error: error.message }, true);
+            }
+        }
+
+        async function createCategory() {
+            try {
+                const categoryData = {
+                    name: 'Test Category ' + Date.now(),
+                    description: 'Created from browser test'
+                };
+                
+                const response = await fetch(`${API_BASE}/api/categories`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(categoryData)
+                });
+                
+                const data = await response.json();
+                displayResult('categories-result', data);
+            } catch (error) {
+                displayResult('categories-result', { error: error.message }, true);
+            }
+        }
+
+        async function getInventory() {
+            try {
+                const response = await fetch(`${API_BASE}/api/inventory`);
+                const data = await response.json();
+                displayResult('inventory-result', data);
+            } catch (error) {
+                displayResult('inventory-result', { error: error.message }, true);
+            }
+        }
+
+        async function createInventoryItem() {
+            try {
+                // First get categories to use one for the inventory item
+                const categoriesResponse = await fetch(`${API_BASE}/api/categories`);
+                const categoriesData = await categoriesResponse.json();
+                
+                if (!categoriesData.success || categoriesData.data.length === 0) {
+                    displayResult('inventory-result', { error: 'No categories available. Create a category first.' }, true);
+                    return;
+                }
+                
+                const categoryId = categoriesData.data[0]._id;
+                
+                const inventoryData = {
+                    itemName: 'Test Item ' + Date.now(),
+                    itemCode: 'TEST' + Date.now(),
+                    qty: 10,
+                    category: categoryId,
+                    unit: 'Pieces',
+                    rate: 150
+                };
+                
+                const response = await fetch(`${API_BASE}/api/inventory`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(inventoryData)
+                });
+                
+                const data = await response.json();
+                displayResult('inventory-result', data);
+            } catch (error) {
+                displayResult('inventory-result', { error: error.message }, true);
+            }
+        }
+
+        // Auto-test health on page load
+        window.onload = function() {
+            testHealth();
+        };
+    </script>
+</body>
+</html>

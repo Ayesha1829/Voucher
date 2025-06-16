@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -10,14 +10,18 @@ import {
   ListItemText,
   Alert,
   Snackbar,
-  Chip
+  Chip,
+  CircularProgress
 } from '@mui/material';
 
 // Interface for Category
 interface Category {
-  id: string;
+  _id: string;
   name: string;
-  createdAt: Date;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const AddCategory: React.FC = () => {
@@ -26,24 +30,67 @@ const AddCategory: React.FC = () => {
   const [showExistingCategories, setShowExistingCategories] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
-  const [nextId, setNextId] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [fetchingCategories, setFetchingCategories] = useState<boolean>(false);
 
-  // Generate sequential ID for categories
-  const generateUniqueId = (): string => {
-    const id = nextId.toString();
-    setNextId(prev => prev + 1);
-    return id;
+  // API base URL
+  const API_BASE_URL = 'http://localhost:5000/api';
+
+  // Fetch categories from backend
+  const fetchCategories = async () => {
+    try {
+      setFetchingCategories(true);
+      console.log('Fetching categories from:', `${API_BASE_URL}/categories`);
+
+      const response = await fetch(`${API_BASE_URL}/categories`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log('Categories response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Categories data:', data);
+
+      if (data.success) {
+        setCategories(data.data || []);
+      } else {
+        setSnackbarMessage('Failed to fetch categories: ' + (data.message || 'Unknown error'));
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      if (error instanceof Error) {
+        setSnackbarMessage('Error fetching categories: ' + error.message);
+      } else {
+        setSnackbarMessage('Error fetching categories');
+      }
+      setSnackbarOpen(true);
+    } finally {
+      setFetchingCategories(false);
+    }
   };
 
+  // Load categories on component mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   // Handle saving a new category
-  const handleSaveCategory = () => {
+  const handleSaveCategory = async () => {
     if (categoryName.trim() === '') {
       setSnackbarMessage('Please enter a category name');
       setSnackbarOpen(true);
       return;
     }
 
-    // Check if category already exists
+    // Check if category already exists locally
     const existingCategory = categories.find(
       cat => cat.name.toLowerCase() === categoryName.toLowerCase()
     );
@@ -54,16 +101,42 @@ const AddCategory: React.FC = () => {
       return;
     }
 
-    const newCategory: Category = {
-      id: generateUniqueId(),
-      name: categoryName.trim(),
-      createdAt: new Date(),
-    };
+    try {
+      setLoading(true);
 
-    setCategories(prev => [...prev, newCategory]);
-    setCategoryName('');
-    setSnackbarMessage('Category added successfully!');
-    setSnackbarOpen(true);
+      const response = await fetch(`${API_BASE_URL}/categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add auth token if available
+          ...(localStorage.getItem('token') && {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          })
+        },
+        body: JSON.stringify({
+          name: categoryName.trim()
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Add the new category to local state
+        setCategories(prev => [...prev, data.data]);
+        setCategoryName('');
+        setSnackbarMessage('Category added successfully!');
+        setSnackbarOpen(true);
+      } else {
+        setSnackbarMessage(data.message || 'Failed to add category');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error adding category:', error);
+      setSnackbarMessage('Error adding category');
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle showing/hiding existing categories
@@ -106,7 +179,7 @@ const AddCategory: React.FC = () => {
               mb: { xs: 2, md: 3 },
               fontWeight: "bold",
               color: "black",
-              backgroundColor: "#D9E1FA",
+              backgroundColor: "#C68FFD",
               py: { xs: 1.5, md: 2 },
               borderRadius: 1,
               fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' }
@@ -193,6 +266,7 @@ const AddCategory: React.FC = () => {
               <Button
                 variant="contained"
                 onClick={handleSaveCategory}
+                disabled={loading}
                 sx={{
                   minWidth: { xs: '180px', md: '200px' },
                   width: { xs: '100%', sm: 'auto' },
@@ -206,11 +280,21 @@ const AddCategory: React.FC = () => {
                     backgroundColor: "#45a049",
                     transform: { xs: 'none', md: 'translateY(-2px)' },
                   },
+                  "&:disabled": {
+                    backgroundColor: "#cccccc",
+                  },
                   transition: 'all 0.2s ease-in-out',
                   boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
                 }}
               >
-                💾 SAVE CATEGORY
+                {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                    SAVING...
+                  </>
+                ) : (
+                  '💾 SAVE CATEGORY'
+                )}
               </Button>
 
               <Button
@@ -304,8 +388,20 @@ const AddCategory: React.FC = () => {
                 p: 4
               }}>
                 <List sx={{ p: 0 }}>
-                  {categories.map((category) => (
-                    <React.Fragment key={category.id}>
+                  {fetchingCategories ? (
+                    <ListItem sx={{ py: 3, px: 4, justifyContent: 'center' }}>
+                      <CircularProgress size={30} />
+                      <Typography sx={{ ml: 2 }}>Loading categories...</Typography>
+                    </ListItem>
+                  ) : categories.length === 0 ? (
+                    <ListItem sx={{ py: 3, px: 4, justifyContent: 'center' }}>
+                      <Typography variant="body1" sx={{ color: '#666', fontSize: '1.1rem' }}>
+                        No categories found. Add your first category above!
+                      </Typography>
+                    </ListItem>
+                  ) : (
+                    categories.map((category) => (
+                      <React.Fragment key={category._id}>
                       <ListItem
                         sx={{
                           py: 3,
@@ -330,7 +426,7 @@ const AddCategory: React.FC = () => {
                                 {category.name}
                               </Typography>
                               <Chip
-                                label={`ID: ${category.id}`}
+                                label={`ID: ${category._id.slice(-6)}`}
                                 size="medium"
                                 sx={{
                                   backgroundColor: '#D9E1FA',
@@ -346,13 +442,14 @@ const AddCategory: React.FC = () => {
                           }
                           secondary={
                             <Typography variant="body1" sx={{ color: '#666', fontSize: '1.1rem' }}>
-                              📅 Created: {category.createdAt.toLocaleDateString()} at {category.createdAt.toLocaleTimeString()}
+                              📅 Created: {new Date(category.createdAt).toLocaleDateString()} at {new Date(category.createdAt).toLocaleTimeString()}
                             </Typography>
                           }
                         />
                       </ListItem>
-                    </React.Fragment>
-                  ))}
+                      </React.Fragment>
+                    ))
+                  )}
                 </List>
               </Box>
             )}

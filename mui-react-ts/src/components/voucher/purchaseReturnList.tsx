@@ -34,13 +34,14 @@ import {
 // Define interfaces for type safety
 interface PurchaseReturnVoucher {
   id: string;
+  _id?: string;
   prvId: string;
   dated: string;
   description: string;
   entries: number;
   supplierName?: string;
   totalAmount?: number;
-  status?: "Pending" | "Approved" | "Rejected";
+  status?: "Pending" | "Approved" | "Rejected" | "Submitted";
 }
 
 interface PurchaseReturnListProps {
@@ -70,42 +71,57 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
     PurchaseReturnVoucher[]
   >([]);
 
-  // Sample data for demonstration
-  const [sampleVouchers] = useState<PurchaseReturnVoucher[]>([
-    {
-      id: "1",
-      prvId: "PRV-001",
-      dated: "2024-01-15",
-      description: "Return of defective laptops",
-      entries: 3,
-      supplierName: "ABC Electronics Ltd.",
-      totalAmount: 3600.0,
-      status: "Approved",
-    },
-    {
-      id: "2",
-      prvId: "PRV-002",
-      dated: "2024-01-14",
-      description: "Wrong items delivered",
-      entries: 2,
-      supplierName: "XYZ Components Inc.",
-      totalAmount: 1200.0,
-      status: "Pending",
-    },
-    {
-      id: "3",
-      prvId: "PRV-003",
-      dated: "2024-01-13",
-      description: "Damaged goods in transit",
-      entries: 5,
-      supplierName: "Tech Solutions Pvt Ltd.",
-      totalAmount: 2500.0,
-      status: "Approved",
-    },
-  ]);
+  // State for API data
+  const [apiVouchers, setApiVouchers] = useState<PurchaseReturnVoucher[]>([]);
+  const [apiLoading, setApiLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  // Use sample data if no vouchers provided
-  const displayVouchers = vouchers.length > 0 ? vouchers : sampleVouchers;
+  // Use API data if available, otherwise use props
+  const displayVouchers = apiVouchers.length > 0 ? apiVouchers : vouchers;
+
+  // Fetch purchase returns from API
+  const fetchPurchaseReturns = async () => {
+    try {
+      setApiLoading(true);
+      setApiError(null);
+
+      console.log('Fetching purchase returns from API...');
+
+      const response = await fetch('http://localhost:5000/api/purchase-returns', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Purchase returns API response:', result);
+
+      if (result.success) {
+        const items = result.data?.items || result.data || [];
+        console.log('Setting purchase returns:', items.length, 'items');
+        setApiVouchers(items);
+      } else {
+        throw new Error(result.message || 'Failed to fetch purchase returns');
+      }
+    } catch (error) {
+      console.error('Error fetching purchase returns:', error);
+      setApiError(error instanceof Error ? error.message : 'Unknown error');
+      // Don't show error to user, just use empty array
+      setApiVouchers([]);
+    } finally {
+      setApiLoading(false);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchPurchaseReturns();
+  }, []);
 
   // Filter vouchers based on search term
   useEffect(() => {
@@ -163,9 +179,37 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (onDelete) {
       onDelete(id);
+      return;
+    }
+
+    // Handle API delete
+    try {
+      const response = await fetch(`http://localhost:5000/api/purchase-returns/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Remove from local state
+        setApiVouchers(prev => prev.filter(voucher => voucher.id !== id && voucher._id !== id));
+        console.log('Purchase return deleted successfully');
+      } else {
+        throw new Error(result.message || 'Failed to delete purchase return');
+      }
+    } catch (error) {
+      console.error('Error deleting purchase return:', error);
+      alert('Failed to delete purchase return. Please try again.');
     }
   };
 
@@ -204,7 +248,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "black",
-            backgroundColor: "#D9E1FA",
+            backgroundColor: "#C68FFD",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,
@@ -297,7 +341,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
         {/* Mobile Card View */}
         {isMobile ? (
           <Box sx={{ mb: 3 }}>
-            {loading ? (
+            {(loading || apiLoading) ? (
               <Box sx={{ textAlign: "center", py: 4 }}>
                 <CircularProgress size={24} sx={{ mr: 2 }} />
                 <Typography>Loading...</Typography>
@@ -407,7 +451,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {loading ? (
+              {(loading || apiLoading) ? (
                 <TableRow>
                   <TableCell
                     colSpan={5}

@@ -159,7 +159,7 @@ const SalesVoucher: React.FC = () => {
   };
 
   // Function to handle form submission
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validate that all required fields are filled
     const isValid =
       voucherDate.trim() !== "" &&
@@ -177,38 +177,69 @@ const SalesVoucher: React.FC = () => {
       return;
     }
 
-    // Here you would typically send the data to your backend
-    const voucherData = {
-      date: formatDateToDisplay(voucherDate), // Convert to dd/mm/yyyy for display/storage
-      party: selectedParty,
-      carton: carton,
-      closingBalance: closingBalance,
-      items: salesItems,
-      grandTotal: salesItems.reduce((sum, item) => sum + item.total, 0),
-    };
+    try {
+      // Prepare data for backend API
+      const voucherData = {
+        date: formatDateToDisplay(voucherDate), // Convert to dd/mm/yyyy for display/storage
+        party: selectedParty,
+        items: salesItems.map(item => ({
+          itemName: item.item,
+          quantity: item.dzn + item.pcs, // Combine dzn and pcs as total quantity
+          rate: item.rate,
+          category: item.category,
+          detail: item.detail,
+          disc: item.disc,
+          exDisc: item.exDisc,
+          total: item.total
+        }))
+      };
 
-    console.log("Sales voucher data:", voucherData);
-    alert("Sales voucher saved successfully!");
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/vouchers/sales', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(voucherData),
+      });
 
-    // Reset form
-    setVoucherDate("");
-    setSelectedParty("");
-    setCarton("");
-    setClosingBalance("");
-    setSalesItems([
-      {
-        id: generateId(),
-        item: "",
-        dzn: 0,
-        pcs: 0,
-        rate: 0,
-        category: "",
-        detail: "",
-        disc: 0,
-        exDisc: 0,
-        total: 0,
-      },
-    ]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Sales voucher saved:", result);
+
+      if (result.success) {
+        alert(`Sales voucher saved successfully! Voucher ID: ${result.data.id}`);
+      } else {
+        throw new Error(result.message || 'Failed to save voucher');
+      }
+
+      // Reset form
+      setVoucherDate("");
+      setSelectedParty("");
+      setCarton("");
+      setClosingBalance("");
+      setSalesItems([
+        {
+          id: generateId(),
+          item: "",
+          dzn: 0,
+          pcs: 0,
+          rate: 0,
+          category: "",
+          detail: "",
+          disc: 0,
+          exDisc: 0,
+          total: 0,
+        },
+      ]);
+    } catch (error) {
+      console.error('Error saving sales voucher:', error);
+      alert('Failed to save sales voucher. Please check if the backend server is running.');
+    }
   };
 
   return (
@@ -236,7 +267,7 @@ const SalesVoucher: React.FC = () => {
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#D9E1FA",
+            backgroundColor: "#C68FFD",
             color: "black",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },
