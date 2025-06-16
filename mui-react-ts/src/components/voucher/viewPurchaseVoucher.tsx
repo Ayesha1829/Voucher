@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useCallback} from "react";
 import {
   Box,
   Typography,
@@ -58,12 +58,12 @@ const ViewPurchaseVoucher: React.FC = () => {
   const [selectedVoucher, setSelectedVoucher] = useState<PurchaseVoucher | null>(null);
 
   // API call to fetch vouchers
-  const fetchVouchers = async () => {
+  const fetchVouchers = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
 
-      const response = await fetch('http://localhost:5000/api/purchase-returns', {
+      const response = await fetch('http://localhost:5000/api/vouchers/purchase', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ const ViewPurchaseVoucher: React.FC = () => {
       console.log('API Response:', result);
 
       if (result.success) {
-        const items = result.data?.items || result.data || [];
+        const items = result.data?.vouchers || result.data?.items || result.data || [];
         // Filter out voided vouchers for the main view
         const activeVouchers = items.filter((item: any) => item.status !== 'Voided');
         setVouchers(activeVouchers);
@@ -96,12 +96,12 @@ const ViewPurchaseVoucher: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // useEffect to fetch data on component mount and when page/limit changes
   useEffect(() => {
     fetchVouchers();
-  }, [currentPage, entriesPerPage]);
+  }, [fetchVouchers, currentPage, entriesPerPage]);
 
   // Search functionality
   useEffect(() => {

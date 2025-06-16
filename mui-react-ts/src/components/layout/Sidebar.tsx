@@ -17,17 +17,23 @@ import { styled } from "@mui/material/styles";
 import {
   Dashboard,
   Inventory,
-  Receipt,
   Category,
   Add,
   List as ListIcon,
   ExpandLess,
   ExpandMore,
-  ShoppingCart,
   Assessment,
   Settings,
   Search,
   Close,
+  Visibility,
+  Block,
+  Assignment,
+  PostAdd,
+  RemoveShoppingCart,
+  TrendingDown,
+  TrendingUp,
+  Undo,
 } from "@mui/icons-material";
 
 const drawerWidth = 280;
@@ -187,21 +193,51 @@ const Sidebar: React.FC<SidebarProps> = ({
         { id: "add-stock", title: "Add Stock", icon: <Add /> },
         { id: "stock-list", title: "Stock List", icon: <ListIcon /> },
         { id: "stock-summary", title: "Stock Summary", icon: <Assessment /> },
-        { id: "nil-stocks", title: "Nil Stocks", icon: <ShoppingCart /> },
+        { id: "nil-stocks", title: "Nil Stocks", icon: <RemoveShoppingCart /> },
       ],
     },
     {
-      id: "vouchers",
-      title: "Vouchers",
-      icon: <Receipt />,
+      id: "purchase-voucher-section",
+      title: "Purchase Voucher",
+      icon: <TrendingDown />,
       hasSubmenu: true,
       submenu: [
-        { id: "purchase-voucher", title: "Purchase Voucher", icon: <Receipt /> },
-        { id: "purchase-return-list", title: "Purchase Return", icon: <Receipt /> },
-        { id: "sales-voucher", title: "Sales Voucher", icon: <Receipt /> },
-        { id: "sales-return-list", title: "Sales Return", icon: <Receipt /> },
-        { id: "journal-voucher", title: "Journal Voucher", icon: <Receipt /> },
-        { id: "cash-voucher", title: "Cash Voucher", icon: <Receipt /> },
+        { id: "purchase-voucher", title: "Entry P Voucher", icon: <PostAdd /> },
+        { id: "view-purchase-voucher", title: "View P Voucher", icon: <Visibility /> },
+        { id: "void-purchase-voucher", title: "Void P Voucher", icon: <Block /> },
+      ],
+    },
+    {
+      id: "purchase-return-section",
+      title: "Purchase Return",
+      icon: <Undo />,
+      hasSubmenu: true,
+      submenu: [
+        { id: "entry-purchase-return", title: "Entry Purchase Return", icon: <PostAdd /> },
+        { id: "view-purchase-return", title: "View Purchase Return", icon: <Visibility /> },
+        { id: "void-purchase-return", title: "Void Purchase Return", icon: <Block /> },
+      ],
+    },
+    {
+      id: "sales-voucher-section",
+      title: "Sales Voucher",
+      icon: <TrendingUp />,
+      hasSubmenu: true,
+      submenu: [
+        { id: "sales-voucher", title: "Entry Sales Voucher", icon: <PostAdd /> },
+        { id: "view-sales-voucher", title: "View Sales Voucher", icon: <Visibility /> },
+        { id: "void-sales-voucher", title: "Void Sales Voucher", icon: <Block /> },
+      ],
+    },
+    {
+      id: "sales-return-section",
+      title: "Sales Return",
+      icon: <Assignment />,
+      hasSubmenu: true,
+      submenu: [
+        { id: "entry-sales-return", title: "Entry Sales Return", icon: <PostAdd /> },
+        { id: "view-sales-return", title: "View Sales Return", icon: <Visibility /> },
+        { id: "void-sales-return", title: "Void Sales Return", icon: <Block /> },
       ],
     },
     {
@@ -297,12 +333,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           placeholder="Search for..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search sx={{ color: "#666", fontSize: "20px" }} />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: "#666", fontSize: "20px" }} />
+                </InputAdornment>
+              ),
+            },
           }}
         />
       </SearchContainer>

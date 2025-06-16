@@ -72,7 +72,7 @@ const VoidPurchaseVoucher: React.FC<VoidPurchaseVoucherProps> = ({
       console.log('Fetching voided purchase vouchers...');
 
       // For now, we'll get all vouchers and filter for voided ones
-      const response = await fetch('http://localhost:5000/api/purchase-returns', {
+      const response = await fetch('http://localhost:5000/api/vouchers/purchase', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -80,16 +80,16 @@ const VoidPurchaseVoucher: React.FC<VoidPurchaseVoucherProps> = ({
       });
 
       if (!response.ok) {
-        console.log('Purchase returns endpoint not available');
+        console.log('Purchase vouchers endpoint not available');
         setApiVouchers([]);
         return;
       }
 
       const result = await response.json();
-      console.log('Purchase returns API response:', result);
+      console.log('Purchase vouchers API response:', result);
 
       if (result.success) {
-        const items = result.data?.items || result.data || [];
+        const items = result.data?.vouchers || result.data?.items || result.data || [];
         // Filter for voided vouchers only
         const voidedItems = items.filter((item: any) => item.status === 'Voided');
         setApiVouchers(voidedItems);

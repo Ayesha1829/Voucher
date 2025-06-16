@@ -48,21 +48,32 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    console.log('🔍 Auth Check - Token found:', !!token);
+
     if (!token) {
+      console.log('❌ No token found - showing login');
       setCheckingAuth(false);
       setIsAuthenticated(false);
       return;
     }
+
+    console.log('🔍 Verifying token with backend...');
     // Verify token with backend
     fetch("http://localhost:5000/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then(() => {
+      .then((res) => {
+        console.log('🔍 Token verification response:', res.status);
+        return res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`);
+      })
+      .then((data) => {
+        console.log('✅ Token valid - user authenticated:', data);
         setIsAuthenticated(true);
         setCheckingAuth(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log('❌ Token verification failed:', error);
+        console.log('🗑️ Removing invalid token');
         localStorage.removeItem("token");
         setIsAuthenticated(false);
         setCheckingAuth(false);

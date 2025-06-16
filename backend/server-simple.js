@@ -53,6 +53,8 @@ let inventory = [
 
 let purchaseReturns = [];
 let salesReturns = [];
+let purchaseVouchers = [];
+let salesVouchers = [];
 
 let nextId = 3;
 
@@ -439,6 +441,136 @@ app.delete('/api/sales-returns/:id', (req, res) => {
   }
 });
 
+// Purchase Voucher endpoints
+app.get('/api/vouchers/purchase', (req, res) => {
+  console.log('🔍 GET /api/vouchers/purchase called - Simple Server');
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedVouchers = purchaseVouchers.slice(startIndex, endIndex);
+
+    res.json(successResponse('Purchase vouchers retrieved successfully', {
+      vouchers: paginatedVouchers,
+      total: purchaseVouchers.length,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(purchaseVouchers.length / limit)
+    }));
+  } catch (error) {
+    console.error('Error fetching purchase vouchers:', error);
+    res.status(500).json(errorResponse('Internal server error'));
+  }
+});
+
+app.post('/api/vouchers/purchase', (req, res) => {
+  console.log('🔍 POST /api/vouchers/purchase called - Simple Server');
+  try {
+    const { date, supplier, items } = req.body;
+
+    if (!date || !supplier || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json(errorResponse('Missing required fields: date, supplier, and items are required'));
+    }
+
+    // Generate voucher ID
+    const voucherId = `PV ${(purchaseVouchers.length + 1).toString().padStart(3, '0')}`;
+
+    // Calculate total and entries
+    const total = items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    const entries = items.length;
+
+    const newVoucher = {
+      _id: `pv${nextId++}`,
+      voucherId,
+      date,
+      supplier,
+      items,
+      total,
+      entries,
+      status: 'Active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    purchaseVouchers.push(newVoucher);
+
+    res.status(201).json(successResponse('Purchase voucher created successfully', {
+      id: newVoucher.voucherId,
+      date: newVoucher.date,
+      items: newVoucher.items,
+      entries: newVoucher.entries,
+      total: newVoucher.total
+    }));
+  } catch (error) {
+    console.error('Error creating purchase voucher:', error);
+    res.status(500).json(errorResponse('Internal server error'));
+  }
+});
+
+// Sales Voucher endpoints
+app.get('/api/vouchers/sales', (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedVouchers = salesVouchers.slice(startIndex, endIndex);
+
+    res.json(successResponse('Sales vouchers retrieved successfully', {
+      vouchers: paginatedVouchers,
+      total: salesVouchers.length,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(salesVouchers.length / limit)
+    }));
+  } catch (error) {
+    console.error('Error fetching sales vouchers:', error);
+    res.status(500).json(errorResponse('Internal server error'));
+  }
+});
+
+app.post('/api/vouchers/sales', (req, res) => {
+  try {
+    const { date, party, items } = req.body;
+
+    if (!date || !party || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json(errorResponse('Missing required fields: date, party, and items are required'));
+    }
+
+    // Generate voucher ID
+    const voucherId = `SV ${(salesVouchers.length + 1).toString().padStart(3, '0')}`;
+
+    // Calculate total and entries
+    const total = items.reduce((sum, item) => sum + (item.total || 0), 0);
+    const entries = items.length;
+
+    const newVoucher = {
+      _id: `sv${nextId++}`,
+      voucherId,
+      date,
+      party,
+      items,
+      total,
+      entries,
+      status: 'Active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    salesVouchers.push(newVoucher);
+
+    res.status(201).json(successResponse('Sales voucher created successfully', {
+      id: newVoucher.voucherId,
+      date: newVoucher.date,
+      items: newVoucher.items,
+      entries: newVoucher.entries,
+      total: newVoucher.total
+    }));
+  } catch (error) {
+    console.error('Error creating sales voucher:', error);
+    res.status(500).json(errorResponse('Internal server error'));
+  }
+});
+
 // Simple authentication endpoints (for compatibility)
 app.post('/api/users/login', (req, res) => {
   // Simple mock authentication - always succeeds
@@ -488,6 +620,8 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`📦 Inventory items: ${inventory.length}`);
   console.log(`🔄 Purchase returns: ${purchaseReturns.length}`);
   console.log(`💰 Sales returns: ${salesReturns.length}`);
+  console.log(`📋 Purchase vouchers: ${purchaseVouchers.length}`);
+  console.log(`💳 Sales vouchers: ${salesVouchers.length}`);
   console.log(`\n📋 Available endpoints:`);
   console.log(`   GET  http://localhost:${PORT}/health`);
   console.log(`   GET  http://localhost:${PORT}/api/categories`);
@@ -503,6 +637,10 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`   POST http://localhost:${PORT}/api/sales-returns`);
   console.log(`   GET  http://localhost:${PORT}/api/sales-returns/:id`);
   console.log(`   DELETE http://localhost:${PORT}/api/sales-returns/:id`);
+  console.log(`   GET  http://localhost:${PORT}/api/vouchers/purchase`);
+  console.log(`   POST http://localhost:${PORT}/api/vouchers/purchase`);
+  console.log(`   GET  http://localhost:${PORT}/api/vouchers/sales`);
+  console.log(`   POST http://localhost:${PORT}/api/vouchers/sales`);
 });
 
 server.on('error', (error) => {
