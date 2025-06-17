@@ -15,6 +15,7 @@ const voucherSchema = new mongoose.Schema({
   party: String,    // For sales vouchers
   total: { type: Number, required: true },
   entries: { type: Number, default: 0 }, // Number of items
+  status: { type: String, enum: ['Submitted', 'Voided'], default: 'Submitted' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

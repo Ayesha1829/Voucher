@@ -64,72 +64,8 @@ const NilStocks: React.FC<NilStocksProps> = ({
   const [apiItems, setApiItems] = useState<NilStockItem[]>([]);
   const [apiLoading, setApiLoading] = useState(false);
 
-  // Sample data for demonstration
-  const [sampleItems] = useState<NilStockItem[]>([
-    {
-      id: "1",
-      itemName: "Crystal White Elastic Premium",
-      category: "Elastic",
-      itemCode: "CWE001",
-      currentStock: 0,
-      lastSoldDate: "2024-01-15",
-      reorderLevel: 100,
-      status: "Out of Stock",
-    },
-    {
-      id: "2",
-      itemName: "Aroma Full Bazoo Large",
-      category: "Aroma",
-      itemCode: "AFB002",
-      currentStock: 0,
-      lastSoldDate: "2024-01-10",
-      reorderLevel: 50,
-      status: "Out of Stock",
-    },
-    {
-      id: "3",
-      itemName: "Cotton Full Daraz Medium",
-      category: "Cotton",
-      itemCode: "CFD003",
-      currentStock: 0,
-      lastSoldDate: "2024-01-08",
-      reorderLevel: 75,
-      status: "Out of Stock",
-    },
-    {
-      id: "4",
-      itemName: "B Pair Mix Special",
-      category: "Mix",
-      itemCode: "BPM004",
-      currentStock: 0,
-      lastSoldDate: "2024-01-12",
-      reorderLevel: 25,
-      status: "Out of Stock",
-    },
-    {
-      id: "5",
-      itemName: "Common Socks Regular",
-      category: "Socks",
-      itemCode: "CSR005",
-      currentStock: 0,
-      lastSoldDate: "2024-01-05",
-      reorderLevel: 200,
-      status: "Out of Stock",
-    },
-    {
-      id: "6",
-      itemName: "Cozy Warmer Full Bazoo",
-      category: "Warmer",
-      itemCode: "CWF006",
-      currentStock: 0,
-      lastSoldDate: "2024-01-03",
-      reorderLevel: 30,
-      status: "Out of Stock",
-    },
-  ]);
-
-  // Use sample data if no items provided
-  const displayItems = apiItems.length > 0 ? apiItems : (items.length > 0 ? items : sampleItems);
+  // Use only API data or props
+  const displayItems = apiItems.length > 0 ? apiItems : items;
 
   // Fetch nil stocks from API (placeholder for future implementation)
   const fetchNilStocks = async () => {

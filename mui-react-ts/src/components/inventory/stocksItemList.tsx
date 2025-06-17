@@ -211,7 +211,16 @@ const StocksItemList: React.FC<StockItemListProps> = ({
     } else {
       fetchStockItems();
     }
-  }, [stockItems]);
+  }, [stockItems, fetchStockItems]);
+
+  // Auto-refresh every 30 seconds to get latest data
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchStockItems();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [fetchStockItems]);
 
   // Use internal stock items for display
   const displayItems = internalStockItems;

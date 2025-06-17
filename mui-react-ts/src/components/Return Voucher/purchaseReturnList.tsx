@@ -29,6 +29,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Visibility as ViewIcon,
+  Print as PrintIcon,
+  Refresh as RefreshIcon,
 } from "@mui/icons-material";
 
 // Define interfaces for type safety
@@ -76,22 +78,19 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
   const [apiLoading, setApiLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // Use API data if available, otherwise use props
-  const displayVouchers = apiVouchers.length > 0 ? apiVouchers : vouchers;
-
-  // Fetch purchase returns from API
-  const fetchPurchaseReturns = async () => {
+  // API call to fetch returns
+  const fetchReturns = async () => {
     try {
       setApiLoading(true);
       setApiError(null);
 
-      console.log('Fetching purchase returns from API...');
-
-      const response = await fetch('http://localhost:5000/api/purchase-returns', {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/purchase-returns?page=1&limit=100`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        }
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -99,29 +98,41 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
       }
 
       const result = await response.json();
-      console.log('Purchase returns API response:', result);
 
-      if (result.success) {
-        const items = result.data?.items || result.data || [];
-        console.log('Setting purchase returns:', items.length, 'items');
-        setApiVouchers(items);
-      } else {
-        throw new Error(result.message || 'Failed to fetch purchase returns');
-      }
-    } catch (error) {
-      console.error('Error fetching purchase returns:', error);
-      setApiError(error instanceof Error ? error.message : 'Unknown error');
-      // Don't show error to user, just use empty array
+      const data = result.data || {};
+      const items = data.items || [];
+
+      // Filter out voided returns for the main view
+      const activeReturns = items.filter((item: any) => item.status !== 'Voided');
+
+      // Map to the expected format
+      const mappedReturns = activeReturns.map((item: any) => ({
+        id: item.id || item._id,
+        _id: item._id,
+        prvId: item.prvId || item.prv_id || item.PRV_ID || item.prvid || item.purchaseReturnId || item.PRV_NO || item.PR_NO || item.id || '', // add PR_NO
+        dated: item.dated || item.date || item.datedAt || item.createdAt || item.return_date || '', // add return_date
+        description: item.description,
+        entries: item.numberOfEntries || item.entries || 0,
+        status: item.status || 'Submitted'
+      }));
+
+      setApiVouchers(mappedReturns);
+    } catch (err: any) {
+      setApiError(err.message || 'Failed to fetch returns');
+      console.error('Error fetching returns:', err);
       setApiVouchers([]);
     } finally {
       setApiLoading(false);
     }
   };
 
-  // Load data on component mount
+  // Fetch data on component mount
   useEffect(() => {
-    fetchPurchaseReturns();
+    fetchReturns();
   }, []);
+
+  // Use API data if available, otherwise use props
+  const displayVouchers = apiVouchers.length > 0 ? apiVouchers : vouchers;
 
   // Filter vouchers based on search term
   useEffect(() => {
@@ -187,10 +198,12 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
 
     // Handle API delete
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/purchase-returns/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         }
       });
 
@@ -203,7 +216,6 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
       if (result.success) {
         // Remove from local state
         setApiVouchers(prev => prev.filter(voucher => voucher.id !== id && voucher._id !== id));
-        console.log('Purchase return deleted successfully');
       } else {
         throw new Error(result.message || 'Failed to delete purchase return');
       }
@@ -217,6 +229,11 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
     if (onView) {
       onView(voucher);
     }
+  };
+
+  const handlePrint = (_voucher: PurchaseReturnVoucher) => {
+    // TODO: Implement print functionality
+    window.print();
   };
 
   return (
@@ -283,7 +300,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
             gap: { xs: 2, sm: 2 },
           }}
         >
-          {/* Show entries dropdown */}
+          {/* Show entries dropdown and refresh */}
           <Box sx={{
             display: "flex",
             alignItems: "center",
@@ -309,6 +326,25 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
             <Typography variant="body2" sx={{ fontSize: { xs: "0.875rem", sm: "0.875rem" } }}>
               entries
             </Typography>
+
+            {/* Refresh Button */}
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<RefreshIcon />}
+              onClick={fetchReturns}
+              disabled={apiLoading}
+              sx={{
+                borderColor: '#D9E1FA',
+                color: '#333',
+                '&:hover': {
+                  borderColor: '#B8C5F2',
+                  backgroundColor: '#f8f9ff',
+                },
+              }}
+            >
+              Refresh
+            </Button>
           </Box>
 
           {/* Search box */}
@@ -360,7 +396,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
                           {voucher.prvId}
                         </Typography>
                         <Typography variant="body2" color="textSecondary" sx={{ fontSize: "0.875rem" }}>
-                          {new Date(voucher.dated).toLocaleDateString()}
+                          {voucher.dated ? new Date(voucher.dated).toLocaleDateString('en-GB') : 'Invalid Date'}
                         </Typography>
                       </Box>
                       <Chip
@@ -378,6 +414,11 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
                       <Tooltip title="View Details">
                         <IconButton size="small" color="primary" onClick={() => handleView(voucher)}>
                           <ViewIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Print Voucher">
+                        <IconButton size="small" color="success" onClick={() => handlePrint(voucher)}>
+                          <PrintIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Edit Voucher">
@@ -493,7 +534,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
                     <TableCell sx={{
                       fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.875rem" }
                     }}>
-                      {new Date(voucher.dated).toLocaleDateString()}
+                      {voucher.dated ? new Date(voucher.dated).toLocaleDateString('en-GB') : 'Invalid Date'}
                     </TableCell>
                     <TableCell sx={{
                       fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.875rem" },
@@ -518,18 +559,34 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
                         justifyContent: "center",
                         flexWrap: "wrap"
                       }}>
-                        <Tooltip title="View Details">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleView(voucher)}
-                            sx={{
-                              padding: { xs: "4px", md: "8px" }
-                            }}
-                          >
-                            <ViewIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => handleView(voucher)}
+                          sx={{
+                            backgroundColor: '#2196F3',
+                            '&:hover': { backgroundColor: '#1976D2' },
+                            textTransform: 'none',
+                            minWidth: '70px',
+                            color: 'white'
+                          }}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => handlePrint(voucher)}
+                          sx={{
+                            backgroundColor: '#4CAF50',
+                            '&:hover': { backgroundColor: '#388E3C' },
+                            textTransform: 'none',
+                            minWidth: '70px',
+                            color: 'white'
+                          }}
+                        >
+                          Print
+                        </Button>
                         <Tooltip title="Edit Voucher">
                           <IconButton
                             size="small"

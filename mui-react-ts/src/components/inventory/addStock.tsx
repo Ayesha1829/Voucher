@@ -64,10 +64,12 @@ const CreateStocks: React.FC = () => {
       setLoadingCategories(true);
       console.log('Fetching categories from:', `${API_BASE_URL}/categories`);
 
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE_URL}/categories`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         }
       });
 

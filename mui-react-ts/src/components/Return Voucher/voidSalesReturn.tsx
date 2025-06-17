@@ -72,10 +72,12 @@ const VoidSalesReturn: React.FC<VoidSalesReturnProps> = ({
       console.log('Fetching voided sales returns...');
       
       // Get all sales returns and filter for voided ones
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/sales-returns', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         }
       });
 

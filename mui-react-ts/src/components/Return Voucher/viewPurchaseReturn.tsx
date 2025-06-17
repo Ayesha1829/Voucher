@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -22,35 +22,24 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import PrintIcon from "@mui/icons-material/Print";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import SalesVoucherDetail from "./salesVoucherDetail";
-import EditSalesVoucher from "./editSalesVoucher";
+import PurchaseReturnDetail from "./purchaseReturnDetail";
+import EditPurchaseReturn from "./editPurchaseReturn";
 
-// TypeScript interface for Sales Voucher Item
-interface SalesVoucherItem {
-  itemName: string;
-  quantity: number;
-  rate: number;
-}
-
-// TypeScript interface for Sales Voucher
-interface SalesVoucher {
+// TypeScript interface for Purchase Return
+interface PurchaseReturn {
   id: string;
   _id?: string;
   date: string;
-  dated?: string;
-  description?: string;
-  items: SalesVoucherItem[];
-  entries: number;
+  description: string;
+  numberOfEntries: number;
   status?: 'Submitted' | 'Voided';
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-
-
-const ViewSalesVoucher: React.FC = () => {
-  // State for vouchers data
-  const [vouchers, setVouchers] = useState<SalesVoucher[]>([]);
+const ViewPurchaseReturn: React.FC = () => {
+  // State for returns data
+  const [returns, setReturns] = useState<PurchaseReturn[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
 
@@ -58,35 +47,22 @@ const ViewSalesVoucher: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [entriesPerPage, setEntriesPerPage] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalEntries, setTotalEntries] = useState<number>(0);
 
-  // Filtered vouchers based on search
-  const [filteredVouchers, setFilteredVouchers] = useState<SalesVoucher[]>([]);
+  // Filtered returns based on search
+  const [filteredReturns, setFilteredReturns] = useState<PurchaseReturn[]>([]);
 
   // State for view mode
   const [viewMode, setViewMode] = useState<'list' | 'detail' | 'edit'>('list');
-  const [selectedVoucher, setSelectedVoucher] = useState<SalesVoucher | null>(null);
+  const [selectedReturn, setSelectedReturn] = useState<PurchaseReturn | null>(null);
 
-  // Helper function to format description from items
-  const formatDescription = (items: SalesVoucherItem[]): string => {
-    if (items.length === 0) return 'No items';
-    if (items.length === 1) {
-      const item = items[0];
-      return `${item.itemName} - ${item.quantity} - ${item.rate}`;
-    }
-    // For multiple items, show first item and count
-    const firstItem = items[0];
-    return `${firstItem.itemName} - ${firstItem.quantity} - ${firstItem.rate} (+${items.length - 1} more items)`;
-  };
-
-  // API call to fetch vouchers
-  const fetchVouchers = async () => {
+  // API call to fetch returns
+  const fetchReturns = async () => {
     try {
       setLoading(true);
       setError('');
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/vouchers/sales?page=${currentPage}&limit=${entriesPerPage}`, {
+      const response = await fetch(`http://localhost:5000/api/purchase-returns?page=${currentPage}&limit=${entriesPerPage}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -99,27 +75,21 @@ const ViewSalesVoucher: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log('API Response:', result); // Debug log
+      console.log('API Response:', result);
 
-      // Extract data from the successResponse format
       const data = result.data || {};
-      const vouchers = data.vouchers || [];
-      const total = data.total || 0;
+      const items = data.items || [];
 
-      // Filter out voided vouchers for the main view
-      const activeVouchers = vouchers.filter((voucher: any) => voucher.status !== 'Voided');
-
-      setVouchers(activeVouchers);
-      setTotalEntries(total);
-      setFilteredVouchers(activeVouchers);
+      // Filter out voided returns for the main view
+      const activeReturns = items.filter((item: any) => item.status !== 'Voided');
+      
+      setReturns(activeReturns);
+      setFilteredReturns(activeReturns);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch vouchers');
-      console.error('Error fetching vouchers:', err);
-
-      // No sample data - show empty state
-      setVouchers([]);
-      setFilteredVouchers([]);
-      setTotalEntries(0);
+      setError(err.message || 'Failed to fetch returns');
+      console.error('Error fetching returns:', err);
+      setReturns([]);
+      setFilteredReturns([]);
     } finally {
       setLoading(false);
     }
@@ -127,84 +97,78 @@ const ViewSalesVoucher: React.FC = () => {
 
   // useEffect to fetch data on component mount and when page/limit changes
   useEffect(() => {
-    fetchVouchers();
+    fetchReturns();
   }, [currentPage, entriesPerPage]);
 
   // Search functionality
   useEffect(() => {
     if (searchQuery.trim() === '') {
-      setFilteredVouchers(vouchers);
+      setFilteredReturns(returns);
     } else {
-      const filtered = vouchers.filter(voucher => {
-        const description = formatDescription(voucher.items);
-        return voucher.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               voucher.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               voucher.items.some(item =>
-                 item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
-               );
+      const filtered = returns.filter(returnItem => {
+        return returnItem.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               returnItem.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               returnItem.date.toLowerCase().includes(searchQuery.toLowerCase());
       });
-      setFilteredVouchers(filtered);
+      setFilteredReturns(filtered);
     }
-  }, [searchQuery, vouchers]);
+  }, [searchQuery, returns]);
 
   // Handle actions
-  const handleView = (voucherId: string) => {
-    const voucher = vouchers.find(v => v.id === voucherId || v._id === voucherId);
-    if (voucher) {
-      setSelectedVoucher(voucher);
+  const handleView = (returnId: string) => {
+    const returnItem = returns.find(r => r.id === returnId || r._id === returnId);
+    if (returnItem) {
+      setSelectedReturn(returnItem);
       setViewMode('detail');
     }
   };
 
-  const handlePrint = (voucherId: string) => {
-    console.log('Print voucher:', voucherId);
+  const handlePrint = (returnId: string) => {
+    console.log('Print return:', returnId);
     // TODO: Implement print functionality
   };
 
   // Handle back from detail view
   const handleBack = () => {
     setViewMode('list');
-    setSelectedVoucher(null);
+    setSelectedReturn(null);
   };
 
-  // Handle edit voucher
-  const handleEdit = (voucher: SalesVoucher) => {
-    console.log('Edit voucher:', voucher);
-    setSelectedVoucher(voucher);
+  // Handle edit return
+  const handleEdit = (returnItem: PurchaseReturn) => {
+    console.log('Edit return:', returnItem);
+    setSelectedReturn(returnItem);
     setViewMode('edit');
   };
 
-  // Handle void voucher
-  const handleVoid = (voucher: SalesVoucher) => {
+  // Handle void return
+  const handleVoid = (returnItem: PurchaseReturn) => {
     // Refresh the list after voiding
-    fetchVouchers();
+    fetchReturns();
     handleBack();
   };
 
   // Handle save after edit
-  const handleSave = (updatedVoucher: SalesVoucher) => {
-    // Update the voucher in the list
-    setVouchers(prev => prev.map(v =>
-      v.id === updatedVoucher.id ? updatedVoucher : v
+  const handleSave = (updatedReturn: PurchaseReturn) => {
+    setReturns(prev => prev.map(r => 
+      r.id === updatedReturn.id ? updatedReturn : r
     ));
-    setSelectedVoucher(updatedVoucher);
+    setSelectedReturn(updatedReturn);
     setViewMode('detail');
-    // Refresh the list to get latest data
-    fetchVouchers();
+    fetchReturns();
   };
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredVouchers.length / entriesPerPage);
+  const totalPages = Math.ceil(filteredReturns.length / entriesPerPage);
   const startIndex = (currentPage - 1) * entriesPerPage;
   const endIndex = startIndex + entriesPerPage;
-  const currentVouchers = filteredVouchers.slice(startIndex, endIndex);
+  const currentReturns = filteredReturns.slice(startIndex, endIndex);
 
   // Show detail view if in detail mode
-  if (viewMode === 'detail' && selectedVoucher) {
+  if (viewMode === 'detail' && selectedReturn) {
     return (
-      <SalesVoucherDetail
-        voucher={selectedVoucher}
+      <PurchaseReturnDetail
+        returnItem={selectedReturn}
         onBack={handleBack}
         onEdit={handleEdit}
         onVoid={handleVoid}
@@ -213,27 +177,12 @@ const ViewSalesVoucher: React.FC = () => {
   }
 
   // Show edit view if in edit mode
-  if (viewMode === 'edit' && selectedVoucher) {
-    // Convert voucher format for edit component
-    const editVoucher = {
-      ...selectedVoucher,
-      items: selectedVoucher.items?.map(item => ({
-        id: `${Date.now()}-${Math.random()}`,
-        item: item.itemName || '',
-        category: 'General', // Default category
-        rate: item.rate || 0,
-        quantity: item.quantity || 0,
-        unit: 'Pieces', // Default unit
-        gst: 0, // Default GST
-        total: (item.rate || 0) * (item.quantity || 0) // Calculate total
-      })) || []
-    };
-
+  if (viewMode === 'edit' && selectedReturn) {
     return (
-      <EditSalesVoucher
-        voucher={editVoucher as any}
+      <EditPurchaseReturn
+        returnItem={selectedReturn}
         onBack={() => setViewMode('detail')}
-        onSave={handleSave as any}
+        onSave={handleSave}
       />
     );
   }
@@ -270,7 +219,7 @@ const ViewSalesVoucher: React.FC = () => {
             textAlign: 'center',
           }}
         >
-          Sales Vouchers List
+          Purchase Returns List
         </Typography>
       </Box>
 
@@ -318,7 +267,7 @@ const ViewSalesVoucher: React.FC = () => {
               variant="outlined"
               size="small"
               startIcon={<RefreshIcon />}
-              onClick={fetchVouchers}
+              onClick={fetchReturns}
               disabled={loading}
               sx={{
                 borderColor: '#D9E1FA',
@@ -340,7 +289,7 @@ const ViewSalesVoucher: React.FC = () => {
               size="small"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search vouchers..."
+              placeholder="Search returns..."
               sx={{
                 backgroundColor: '#f8f9ff',
                 '& .MuiOutlinedInput-root': {
@@ -360,7 +309,7 @@ const ViewSalesVoucher: React.FC = () => {
         {error && (
           <Box sx={{ marginBottom: '16px' }}>
             <Typography color="error" variant="body2">
-              Error loading vouchers: {error}. Please check if the backend server is running.
+              Error loading returns: {error}. Please check if the backend server is running.
             </Typography>
           </Box>
         )}
@@ -379,7 +328,7 @@ const ViewSalesVoucher: React.FC = () => {
             <TableHead>
               <TableRow sx={{ backgroundColor: '#C68FFD' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                  SV ID #
+                  PR ID #
                 </TableCell>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                   Date
@@ -401,45 +350,48 @@ const ViewSalesVoucher: React.FC = () => {
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={5} sx={{ textAlign: 'center', padding: '40px' }}>
-                    <Typography>Loading vouchers...</Typography>
+                    <Typography>Loading returns...</Typography>
                   </TableCell>
                 </TableRow>
-              ) : currentVouchers.length === 0 ? (
+              ) : currentReturns.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} sx={{ textAlign: 'center', padding: '40px' }}>
-                    <Typography>No vouchers found</Typography>
+                    <Typography>No returns found</Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                currentVouchers.map((voucher, index) => (
+                currentReturns.map((returnItem, index) => (
                   <TableRow
-                    key={voucher.id}
+                    key={returnItem.id}
                     sx={{
                       backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff',
                       '&:hover': { backgroundColor: '#f0f0f0' },
                     }}
                   >
                     <TableCell sx={{ fontWeight: 'bold', color: '#333' }}>
-                      {voucher.id}
+                      {returnItem.id || returnItem._id || 'N/A'}
                     </TableCell>
-                    <TableCell>{voucher.date}</TableCell>
+                    <TableCell>
+                      {returnItem.date ? new Date(returnItem.date).toLocaleDateString('en-GB') : 'Invalid Date'}
+                    </TableCell>
                     <TableCell sx={{ maxWidth: '400px' }}>
-                      {formatDescription(voucher.items)}
+                      {returnItem.description || 'No description'}
                     </TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>
-                      {voucher.entries}
+                      {returnItem.numberOfEntries || 0}
                     </TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>
-                      <Box sx={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <Box sx={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Button
                           variant="contained"
                           size="small"
-                          startIcon={<VisibilityIcon />}
-                          onClick={() => handleView(voucher.id)}
+                          onClick={() => handleView(returnItem.id)}
                           sx={{
                             backgroundColor: '#2196F3',
                             '&:hover': { backgroundColor: '#1976D2' },
                             textTransform: 'none',
+                            minWidth: '70px',
+                            color: 'white'
                           }}
                         >
                           View
@@ -447,12 +399,13 @@ const ViewSalesVoucher: React.FC = () => {
                         <Button
                           variant="contained"
                           size="small"
-                          startIcon={<PrintIcon />}
-                          onClick={() => handlePrint(voucher.id)}
+                          onClick={() => handlePrint(returnItem.id)}
                           sx={{
-                            backgroundColor: '#C68FFD',
+                            backgroundColor: '#4CAF50',
                             '&:hover': { backgroundColor: '#388E3C' },
                             textTransform: 'none',
+                            minWidth: '70px',
+                            color: 'white'
                           }}
                         >
                           Print
@@ -479,7 +432,7 @@ const ViewSalesVoucher: React.FC = () => {
         >
           {/* Showing entries info */}
           <Typography variant="body2" sx={{ color: '#666' }}>
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredVouchers.length)} of {filteredVouchers.length} entries
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredReturns.length)} of {filteredReturns.length} entries
           </Typography>
 
           {/* Pagination */}
@@ -508,4 +461,4 @@ const ViewSalesVoucher: React.FC = () => {
   );
 };
 
-export default ViewSalesVoucher;
+export default ViewPurchaseReturn;

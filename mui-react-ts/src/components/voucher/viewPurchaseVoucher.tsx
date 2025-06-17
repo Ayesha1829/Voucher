@@ -23,6 +23,15 @@ import PrintIcon from "@mui/icons-material/Print";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PurchaseVoucherDetail from "./purchaseVoucherDetail";
+import EditPurchaseVoucher from "./editPurchaseVoucher";
+
+// TypeScript interface for Purchase Voucher Item
+interface PurchaseVoucherItem {
+  itemName: string;
+  quantity: number;
+  rate: number;
+  total?: number;
+}
 
 // TypeScript interface for Purchase Voucher
 interface PurchaseVoucher {
@@ -30,8 +39,10 @@ interface PurchaseVoucher {
   _id?: string;
   prvId: string;
   dated: string;
+  date?: string; // Alternative date field
   description: string;
   entries: number;
+  items?: PurchaseVoucherItem[];
   status?: 'Submitted' | 'Voided';
   createdAt?: string;
   updatedAt?: string;
@@ -53,8 +64,22 @@ const ViewPurchaseVoucher: React.FC = () => {
   // Filtered vouchers based on search
   const [filteredVouchers, setFilteredVouchers] = useState<PurchaseVoucher[]>([]);
 
+  // Helper function to format description from items or description field
+  const formatDescription = (voucher: PurchaseVoucher): string => {
+    // If voucher has items, format them
+    if (voucher.items && voucher.items.length > 0) {
+      if (voucher.items.length === 1) {
+        const item = voucher.items[0];
+        return `${item.itemName} - ${item.quantity} - ${item.rate}`;
+      }
+      return `${voucher.items.length} items: ${voucher.items.map(item => item.itemName).join(', ')}`;
+    }
+    // Otherwise, use the description field
+    return voucher.description || 'No description';
+  };
+
   // State for view mode
-  const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'detail' | 'edit'>('list');
   const [selectedVoucher, setSelectedVoucher] = useState<PurchaseVoucher | null>(null);
 
   // API call to fetch vouchers
@@ -63,10 +88,12 @@ const ViewPurchaseVoucher: React.FC = () => {
       setLoading(true);
       setError('');
 
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/vouchers/purchase', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -109,10 +136,11 @@ const ViewPurchaseVoucher: React.FC = () => {
       setFilteredVouchers(vouchers);
     } else {
       const filtered = vouchers.filter(voucher => {
+        const description = formatDescription(voucher);
         return voucher.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                voucher.prvId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               voucher.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               voucher.dated.toLowerCase().includes(searchQuery.toLowerCase());
+               description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               (voucher.date || voucher.dated).toLowerCase().includes(searchQuery.toLowerCase());
       });
       setFilteredVouchers(filtered);
     }
@@ -141,7 +169,8 @@ const ViewPurchaseVoucher: React.FC = () => {
   // Handle edit voucher
   const handleEdit = (voucher: PurchaseVoucher) => {
     console.log('Edit voucher:', voucher);
-    // TODO: Implement edit functionality
+    setSelectedVoucher(voucher);
+    setViewMode('edit');
   };
 
   // Handle void voucher
@@ -149,6 +178,18 @@ const ViewPurchaseVoucher: React.FC = () => {
     // Refresh the list after voiding
     fetchVouchers();
     handleBack();
+  };
+
+  // Handle save after edit
+  const handleSave = (updatedVoucher: PurchaseVoucher) => {
+    // Update the voucher in the list
+    setVouchers(prev => prev.map(v =>
+      v.id === updatedVoucher.id ? updatedVoucher : v
+    ));
+    setSelectedVoucher(updatedVoucher);
+    setViewMode('detail');
+    // Refresh the list to get latest data
+    fetchVouchers();
   };
 
   // Calculate pagination
@@ -165,6 +206,17 @@ const ViewPurchaseVoucher: React.FC = () => {
         onBack={handleBack}
         onEdit={handleEdit}
         onVoid={handleVoid}
+      />
+    );
+  }
+
+  // Show edit view if in edit mode
+  if (viewMode === 'edit' && selectedVoucher) {
+    return (
+      <EditPurchaseVoucher
+        voucher={selectedVoucher}
+        onBack={() => setViewMode('detail')}
+        onSave={handleSave}
       />
     );
   }
@@ -353,9 +405,9 @@ const ViewPurchaseVoucher: React.FC = () => {
                     <TableCell sx={{ fontWeight: 'bold', color: '#333' }}>
                       {voucher.id}
                     </TableCell>
-                    <TableCell>{voucher.date}</TableCell>
+                    <TableCell>{voucher.date || voucher.dated}</TableCell>
                     <TableCell sx={{ maxWidth: '400px' }}>
-                      {formatDescription(voucher.items)}
+                      {formatDescription(voucher)}
                     </TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>
                       {voucher.entries}

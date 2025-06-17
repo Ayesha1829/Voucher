@@ -539,12 +539,17 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
 
           {/* User Account */}
           <IconButton
+            onClick={() => {
+              localStorage.removeItem('token');
+              window.location.reload();
+            }}
             sx={{
               color: '#333',
               '&:hover': {
                 backgroundColor: '#B8C5F2',
               },
             }}
+            title="Logout"
           >
             <AccountCircleIcon />
           </IconButton>

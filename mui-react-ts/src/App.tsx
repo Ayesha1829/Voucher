@@ -10,16 +10,18 @@ import StocksItemList from "./components/inventory/stocksItemList";
 import StockSummary from "./components/inventory/stockSummary";
 import NilStocks from "./components/inventory/nilStocks";
 import PurchaseVoucher from "./components/voucher/purchaseVoucher";
-import PurchaseReturnList from "./components/voucher/purchaseReturnList";
-import EntryPurchaseReturn from "./components/voucher/entryPurchaseReturn";
-import EntrySalesReturn from "./components/voucher/entrySalesReturn";
+import PurchaseReturnList from "./components/Return Voucher/purchaseReturnList";
+import EntryPurchaseReturn from "./components/Return Voucher/entryPurchaseReturn";
+import EntrySalesReturn from "./components/Return Voucher/entrySalesReturn";
 import SalesVoucher from "./components/voucher/salesVoucher";
-import SalesReturnList from "./components/voucher/salesReturnList";
+import SalesReturnList from "./components/Return Voucher/salesReturnList";
 import ViewPurchaseVoucher from "./components/voucher/viewPurchaseVoucher";
 import ViewSalesVoucher from "./components/voucher/viewSalesVoucher";
+import ViewPurchaseReturn from "./components/Return Voucher/viewPurchaseReturn";
 import VoidPurchaseVoucher from "./components/voucher/voidPurchaseVoucher";
 import VoidSalesVoucher from "./components/voucher/voidSalesVoucher";
-import VoidSalesReturn from "./components/voucher/voidSalesReturn";
+import VoidSalesReturn from "./components/Return Voucher/voidSalesReturn";
+import VoidPurchaseReturn from "./components/Return Voucher/voidPurchaseReturn";
 import Login from "./components/auth/Login";
 import "./App.css";
 
@@ -42,13 +44,16 @@ const theme = createTheme({
 });
 
 function App() {
-  const [currentSection, setCurrentSection] = useState<string>("dashboard");
+  // Load initial section from localStorage, default to "dashboard"
+  const [currentSection, setCurrentSection] = useState<string>(() => localStorage.getItem("currentSection") || "dashboard");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
 
   useEffect(() => {
+    console.log('🚀 App useEffect triggered');
     const token = localStorage.getItem("token");
     console.log('🔍 Auth Check - Token found:', !!token);
+    console.log('🔍 Current state - isAuthenticated:', isAuthenticated, 'checkingAuth:', checkingAuth);
 
     if (!token) {
       console.log('❌ No token found - showing login');
@@ -79,6 +84,11 @@ function App() {
         setCheckingAuth(false);
       });
   }, []);
+
+  // Persist currentSection to localStorage on change
+  useEffect(() => {
+    localStorage.setItem("currentSection", currentSection);
+  }, [currentSection]);
 
   const handleNavigate = (section: string) => {
     setCurrentSection(section);
@@ -117,9 +127,9 @@ function App() {
       case "purchase-return-list":
         return <PurchaseReturnList />;
       case "view-purchase-return":
-        return <PurchaseReturnList />;
+        return <ViewPurchaseReturn />;
       case "void-purchase-return":
-        return <VoidPurchaseVoucher />;
+        return <VoidPurchaseReturn />;
       case "entry-sales-return":
         return <EntrySalesReturn />;
       case "view-sales-return":
@@ -149,7 +159,10 @@ function App() {
     }
   };
 
+  console.log('🎨 Rendering App - checkingAuth:', checkingAuth, 'isAuthenticated:', isAuthenticated);
+
   if (checkingAuth) {
+    console.log('🔄 Showing loading screen');
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -169,6 +182,7 @@ function App() {
   }
 
   if (!isAuthenticated) {
+    console.log('🔐 Showing login page');
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -176,6 +190,8 @@ function App() {
       </ThemeProvider>
     );
   }
+
+  console.log('✅ Showing main app');
 
   return (
     <ThemeProvider theme={theme}>

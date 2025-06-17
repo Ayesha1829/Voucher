@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Paper,
@@ -23,28 +23,27 @@ import {
   Receipt as ReceiptIcon,
 } from '@mui/icons-material';
 
-// Interface for Purchase Voucher
-interface PurchaseVoucher {
+// Interface for Purchase Return
+interface PurchaseReturn {
   id: string;
   _id?: string;
-  prvId: string;
-  dated: string;
+  date: string;
   description: string;
-  entries: number;
+  numberOfEntries: number;
   status?: 'Submitted' | 'Voided';
   createdAt?: string;
   updatedAt?: string;
 }
 
-interface PurchaseVoucherDetailProps {
-  voucher: PurchaseVoucher | null;
+interface PurchaseReturnDetailProps {
+  returnItem: PurchaseReturn | null;
   onBack: () => void;
-  onEdit: (voucher: PurchaseVoucher) => void;
-  onVoid: (voucher: PurchaseVoucher) => void;
+  onEdit: (returnItem: PurchaseReturn) => void;
+  onVoid: (returnItem: PurchaseReturn) => void;
 }
 
-const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
-  voucher,
+const PurchaseReturnDetail: React.FC<PurchaseReturnDetailProps> = ({
+  returnItem,
   onBack,
   onEdit,
   onVoid,
@@ -65,14 +64,14 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
 
   // Handle void confirmation
   const handleVoidConfirm = async () => {
-    if (!voucher) return;
+    if (!returnItem) return;
 
     try {
       setLoading(true);
       
-      // Call API to void the voucher
+      // Call API to void the return
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/vouchers/${voucher.id || voucher._id}`, {
+      const response = await fetch(`http://localhost:5000/api/purchase-returns/${returnItem.id || returnItem._id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -87,24 +86,24 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
       const result = await response.json();
       
       if (result.success) {
-        showSnackbar('Purchase voucher voided successfully!', 'success');
+        showSnackbar('Purchase return voided successfully!', 'success');
         setVoidDialogOpen(false);
-        onVoid(voucher);
+        onVoid(returnItem);
       } else {
-        throw new Error(result.message || 'Failed to void voucher');
+        throw new Error(result.message || 'Failed to void return');
       }
     } catch (error) {
-      console.error('Error voiding voucher:', error);
-      showSnackbar('Error voiding voucher', 'error');
+      console.error('Error voiding return:', error);
+      showSnackbar('Error voiding return', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!voucher) {
+  if (!returnItem) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography>No voucher selected</Typography>
+        <Typography>No return selected</Typography>
         <Button onClick={onBack} sx={{ mt: 2 }}>
           Go Back
         </Button>
@@ -168,12 +167,12 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
               fontWeight="bold"
               sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}
             >
-              Purchase Voucher Details
+              Purchase Return Details
             </Typography>
           </Box>
         </Box>
 
-        {/* Voucher Info */}
+        {/* Return Info */}
         <Box sx={{ mb: 3 }}>
           <Card sx={{ backgroundColor: '#f8f9fa', mb: 2 }}>
             <CardContent>
@@ -184,10 +183,10 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
               }}>
                 <Box>
                   <Typography variant="subtitle2" color="textSecondary">
-                    Voucher ID
+                    Return ID
                   </Typography>
                   <Typography variant="h6" fontWeight="bold" color="primary">
-                    {voucher.prvId}
+                    {returnItem.id}
                   </Typography>
                 </Box>
                 <Box>
@@ -195,7 +194,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                     Date
                   </Typography>
                   <Typography variant="body1">
-                    {voucher.dated}
+                    {returnItem.date}
                   </Typography>
                 </Box>
                 <Box>
@@ -203,7 +202,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                     Entries
                   </Typography>
                   <Typography variant="body1">
-                    {voucher.entries}
+                    {returnItem.numberOfEntries}
                   </Typography>
                 </Box>
                 <Box>
@@ -211,8 +210,8 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                     Status
                   </Typography>
                   <Chip 
-                    label={voucher.status || 'Submitted'} 
-                    color={voucher.status === 'Voided' ? 'error' : 'success'}
+                    label={returnItem.status || 'Submitted'} 
+                    color={returnItem.status === 'Voided' ? 'error' : 'success'}
                     size="small"
                   />
                 </Box>
@@ -221,7 +220,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                     Description
                   </Typography>
                   <Typography variant="body1">
-                    {voucher.description}
+                    {returnItem.description}
                   </Typography>
                 </Box>
               </Box>
@@ -241,8 +240,8 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
           <Button
             variant="outlined"
             startIcon={<EditIcon />}
-            onClick={() => onEdit(voucher)}
-            disabled={voucher.status === 'Voided'}
+            onClick={() => onEdit(returnItem)}
+            disabled={returnItem.status === 'Voided'}
             sx={{
               px: { xs: 3, md: 4 },
               py: { xs: 1.5, md: 1 },
@@ -250,14 +249,14 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
               minWidth: { xs: '200px', md: 'auto' },
             }}
           >
-            Edit Voucher
+            Edit Return
           </Button>
           
           <Button
             variant="contained"
             startIcon={<VoidIcon />}
             onClick={() => setVoidDialogOpen(true)}
-            disabled={voucher.status === 'Voided' || loading}
+            disabled={returnItem.status === 'Voided' || loading}
             sx={{
               px: { xs: 3, md: 4 },
               py: { xs: 1.5, md: 1 },
@@ -278,7 +277,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                 Voiding...
               </>
             ) : (
-              'Void Voucher'
+              'Void Return'
             )}
           </Button>
         </Box>
@@ -286,15 +285,15 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
 
       {/* Void Confirmation Dialog */}
       <Dialog open={voidDialogOpen} onClose={() => setVoidDialogOpen(false)}>
-        <DialogTitle>Confirm Void Voucher</DialogTitle>
+        <DialogTitle>Confirm Void Return</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to void this purchase voucher? This action cannot be undone.
+            Are you sure you want to void this purchase return? This action cannot be undone.
           </Typography>
           <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-            <Typography variant="subtitle2">Voucher: {voucher.prvId}</Typography>
-            <Typography variant="body2">Date: {voucher.dated}</Typography>
-            <Typography variant="body2">Description: {voucher.description}</Typography>
+            <Typography variant="subtitle2">Return: {returnItem.id}</Typography>
+            <Typography variant="body2">Date: {returnItem.date}</Typography>
+            <Typography variant="body2">Description: {returnItem.description}</Typography>
           </Box>
         </DialogContent>
         <DialogActions>
@@ -305,7 +304,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
             variant="contained"
             disabled={loading}
           >
-            {loading ? 'Voiding...' : 'Void Voucher'}
+            {loading ? 'Voiding...' : 'Void Return'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -329,4 +328,4 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
   );
 };
 
-export default PurchaseVoucherDetail;
+export default PurchaseReturnDetail;

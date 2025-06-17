@@ -1,8 +1,9 @@
 const { validationResult } = require('express-validator');
-const { 
-  successResponse, 
-  errorResponse, 
-  validatePagination, 
+const mongoose = require('mongoose');
+const {
+  successResponse,
+  errorResponse,
+  validatePagination,
   getPaginationMeta,
   generateVoucherCode,
   calculateDiscount,
@@ -256,14 +257,56 @@ const createVoucher = async (req, res) => {
 const updateVoucher = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
+    // First try to find in MongoDB (for purchase/sales vouchers)
+    const mongoVoucher = await Voucher.findOne({
+      $or: [
+        { voucherId: id },
+        { _id: mongoose.Types.ObjectId.isValid(id) ? id : null }
+      ]
+    });
+
+    if (mongoVoucher) {
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json(
+          errorResponse('Validation failed', errors.array())
+        );
+      }
+
+      const updateData = req.body;
+
+      // Update MongoDB voucher
+      const updatedVoucher = await Voucher.findByIdAndUpdate(
+        mongoVoucher._id,
+        {
+          ...updateData,
+          updatedAt: new Date()
+        },
+        { new: true }
+      );
+
+      logger.info(`MongoDB voucher updated: ${id}`, {
+        voucherId: id,
+        type: mongoVoucher.type,
+        updatedBy: req.user.id,
+        changes: Object.keys(updateData)
+      });
+
+      return res.json(
+        successResponse('Voucher updated successfully', updatedVoucher)
+      );
+    }
+
+    // Fallback to in-memory vouchers (for old voucher system)
     const voucherIndex = vouchers.findIndex(v => v.id === id);
     if (voucherIndex === -1) {
       return res.status(404).json(
         errorResponse('Voucher not found')
       );
     }
-    
+
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -271,22 +314,22 @@ const updateVoucher = async (req, res) => {
         errorResponse('Validation failed', errors.array())
       );
     }
-    
+
     const updateData = req.body;
-    
-    // Update voucher
+
+    // Update in-memory voucher
     vouchers[voucherIndex] = {
       ...vouchers[voucherIndex],
       ...updateData,
       updatedAt: new Date()
     };
-    
-    logger.info(`Voucher updated: ${id}`, {
+
+    logger.info(`In-memory voucher updated: ${id}`, {
       voucherId: id,
       updatedBy: req.user.id,
       changes: Object.keys(updateData)
     });
-    
+
     res.json(
       successResponse('Voucher updated successfully', vouchers[voucherIndex])
     );
@@ -306,22 +349,49 @@ const updateVoucher = async (req, res) => {
 const deleteVoucher = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
+    // First try to find in MongoDB (for purchase/sales vouchers)
+    const mongoVoucher = await Voucher.findOne({
+      $or: [
+        { voucherId: id },
+        { _id: mongoose.Types.ObjectId.isValid(id) ? id : null }
+      ]
+    });
+
+    if (mongoVoucher) {
+      // Instead of deleting, set status to 'Voided'
+      await Voucher.findByIdAndUpdate(mongoVoucher._id, {
+        status: 'Voided',
+        updatedAt: new Date()
+      });
+
+      logger.info(`MongoDB voucher voided: ${id}`, {
+        voucherId: id,
+        type: mongoVoucher.type,
+        voidedBy: req.user.id
+      });
+
+      return res.json(
+        successResponse('Voucher voided successfully')
+      );
+    }
+
+    // Fallback to in-memory vouchers (for old voucher system)
     const voucherIndex = vouchers.findIndex(v => v.id === id);
     if (voucherIndex === -1) {
       return res.status(404).json(
         errorResponse('Voucher not found')
       );
     }
-    
+
     const deletedVoucher = vouchers.splice(voucherIndex, 1)[0];
-    
-    logger.info(`Voucher deleted: ${id}`, {
+
+    logger.info(`In-memory voucher deleted: ${id}`, {
       voucherId: id,
       code: deletedVoucher.code,
       deletedBy: req.user.id
     });
-    
+
     res.json(
       successResponse('Voucher deleted successfully')
     );
@@ -493,13 +563,18 @@ const getPurchaseVouchers = async (req, res) => {
     // Format vouchers for frontend
     const formattedVouchers = purchaseVouchers.map(voucher => ({
       id: voucher.voucherId,
+      _id: voucher._id,
+      prvId: voucher.voucherId,
       date: voucher.date,
+      dated: voucher.date,
+      description: `${voucher.items.length} items - Total: ${voucher.total}`,
       items: voucher.items.map(item => ({
         itemName: item.itemName,
         quantity: item.quantity,
         rate: item.rate
       })),
       entries: voucher.entries,
+      status: voucher.status || 'Submitted',
       createdAt: voucher.createdAt,
       updatedAt: voucher.updatedAt
     }));
@@ -600,9 +675,13 @@ const getSalesVouchers = async (req, res) => {
 
     const formattedVouchers = salesVouchers.map(voucher => ({
       id: voucher.voucherId,
+      _id: voucher._id,
       date: voucher.date,
+      dated: voucher.date,
+      description: `${voucher.items.length} items - Total: ${voucher.total}`,
       items: voucher.items,
       entries: voucher.entries,
+      status: voucher.status || 'Submitted',
       createdAt: voucher.createdAt,
       updatedAt: voucher.updatedAt
     }));

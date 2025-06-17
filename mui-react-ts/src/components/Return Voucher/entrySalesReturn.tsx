@@ -16,8 +16,8 @@ import {
   AutoAwesome as AutoIcon,
 } from '@mui/icons-material';
 
-// Interface for Purchase Return
-interface PurchaseReturn {
+// Interface for Sales Return
+interface SalesReturn {
   id: string;
   date: string;
   numberOfEntries: number;
@@ -26,7 +26,7 @@ interface PurchaseReturn {
   status: 'Draft' | 'Submitted';
 }
 
-const EntryPurchaseReturn: React.FC = () => {
+const EntrySalesReturn: React.FC = () => {
   // Form state
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [numberOfEntries, setNumberOfEntries] = useState<number>(1);
@@ -43,7 +43,7 @@ const EntryPurchaseReturn: React.FC = () => {
   const generateVoucherId = () => {
     const timestamp = Date.now();
     const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `PR-${timestamp}-${randomNum}`;
+    return `SR-${timestamp}-${randomNum}`;
   };
 
   // Initialize voucher ID on component mount
@@ -80,7 +80,7 @@ const EntryPurchaseReturn: React.FC = () => {
       setLoading(true);
 
       // Create voucher object
-      const voucher: PurchaseReturn = {
+      const voucher: SalesReturn = {
         id: voucherId,
         date,
         numberOfEntries,
@@ -90,12 +90,14 @@ const EntryPurchaseReturn: React.FC = () => {
       };
 
       // Send to backend API
-      console.log('Purchase Return to submit:', voucher);
+      console.log('Sales Return to submit:', voucher);
 
-      const response = await fetch('http://localhost:5000/api/purchase-returns', {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/sales-returns', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(voucher),
       });
@@ -105,12 +107,12 @@ const EntryPurchaseReturn: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log('Purchase return saved:', result);
+      console.log('Sales return saved:', result);
 
       if (result.success) {
-        showSnackbar(`Purchase return created successfully! ID: ${voucher.id}`, 'success');
+        showSnackbar(`Sales return created successfully! ID: ${voucher.id}`, 'success');
       } else {
-        throw new Error(result.message || 'Failed to save purchase return');
+        throw new Error(result.message || 'Failed to save sales return');
       }
 
       // Reset form
@@ -120,8 +122,8 @@ const EntryPurchaseReturn: React.FC = () => {
       setVoucherId(generateVoucherId());
 
     } catch (error) {
-      console.error('Error creating purchase return:', error);
-      showSnackbar('Error creating purchase return', 'error');
+      console.error('Error creating Sales return:', error);
+      showSnackbar('Error creating Sales return', 'error');
     } finally {
       setLoading(false);
     }
@@ -184,7 +186,7 @@ const EntryPurchaseReturn: React.FC = () => {
             }}
           >
             <ReceiptIcon fontSize="large" />
-            Entry Purchase Return
+            Entry Sales Return
           </Typography>
         </Box>
         {/* Return Details Section */}
@@ -223,8 +225,7 @@ const EntryPurchaseReturn: React.FC = () => {
             display: "grid",
             gridTemplateColumns: {
               xs: '1fr',
-              sm: '1fr 1fr',
-              md: '1fr 1fr 1fr'
+              sm: '1fr 1fr'
             },
             gap: { xs: 2, md: 3 },
             mb: 2
@@ -264,23 +265,6 @@ const EntryPurchaseReturn: React.FC = () => {
                     min: 1,
                     step: 1
                   }
-                }}
-              />
-            </Box>
-            <Box>
-              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                Status
-              </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                value="Draft"
-                variant="outlined"
-                disabled
-                sx={{
-                  "& .MuiInputBase-input": {
-                    backgroundColor: "#f5f5f5",
-                  },
                 }}
               />
             </Box>
@@ -382,4 +366,4 @@ const EntryPurchaseReturn: React.FC = () => {
   );
 };
 
-export default EntryPurchaseReturn;
+export default EntrySalesReturn;

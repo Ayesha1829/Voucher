@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Paper,
@@ -11,93 +11,96 @@ import {
   Chip,
 } from '@mui/material';
 import {
-  Receipt as ReceiptIcon,
+  ArrowBack as ArrowBackIcon,
   Save as SaveIcon,
+  Edit as EditIcon,
+  Receipt as ReceiptIcon,
   AutoAwesome as AutoIcon,
 } from '@mui/icons-material';
 
-// Interface for Sales Return
-interface SalesReturn {
+// Interface for Purchase Return
+interface PurchaseReturn {
   id: string;
+  _id?: string;
   date: string;
-  numberOfEntries: number;
   description: string;
-  createdAt: string;
-  status: 'Draft' | 'Submitted';
+  numberOfEntries: number;
+  status?: 'Submitted' | 'Voided';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-const EntrySalesReturn: React.FC = () => {
+interface EditPurchaseReturnProps {
+  returnItem: PurchaseReturn;
+  onBack: () => void;
+  onSave: (returnItem: PurchaseReturn) => void;
+}
+
+const EditPurchaseReturn: React.FC<EditPurchaseReturnProps> = ({
+  returnItem,
+  onBack,
+  onSave,
+}) => {
   // Form state
-  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [numberOfEntries, setNumberOfEntries] = useState<number>(1);
-  const [description, setDescription] = useState<string>('');
-  const [voucherId, setVoucherId] = useState<string>('');
+  const [formData, setFormData] = useState({
+    date: returnItem.date,
+    description: returnItem.description,
+    numberOfEntries: returnItem.numberOfEntries.toString(),
+  });
 
   // UI state
-  const [loading, setLoading] = useState<boolean>(false);
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning'>('success');
+  const [loading, setLoading] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
-  // Generate unique voucher ID
-  const generateVoucherId = () => {
-    const timestamp = Date.now();
-    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `SR-${timestamp}-${randomNum}`;
-  };
-
-  // Initialize voucher ID on component mount
-  useEffect(() => {
-    setVoucherId(generateVoucherId());
-  }, []);
-
-  // Helper function to show snackbar
-  const showSnackbar = (message: string, severity: 'success' | 'error' | 'warning' = 'success') => {
+  // Show snackbar
+  const showSnackbar = (message: string, severity: 'success' | 'error' = 'success') => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
 
+  // Handle form field changes
+  const handleChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
   // Handle form submission
-  const handleSubmit = async () => {
-    // Validation
-    if (!date) {
-      showSnackbar('Please select a date', 'error');
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    // Validate form
+    if (!formData.date || !formData.description || !formData.numberOfEntries) {
+      showSnackbar('Please fill in all required fields', 'error');
       return;
     }
 
-    if (numberOfEntries < 1) {
-      showSnackbar('Number of entries must be at least 1', 'error');
-      return;
-    }
-
-    if (!description.trim()) {
-      showSnackbar('Please enter a description', 'error');
+    const entriesNum = parseInt(formData.numberOfEntries);
+    if (isNaN(entriesNum) || entriesNum <= 0) {
+      showSnackbar('Number of entries must be a positive number', 'error');
       return;
     }
 
     try {
       setLoading(true);
 
-      // Create voucher object
-      const voucher: SalesReturn = {
-        id: voucherId,
-        date,
-        numberOfEntries,
-        description: description.trim(),
-        createdAt: new Date().toISOString(),
-        status: 'Submitted'
-      };
-
-      // Send to backend API
-      console.log('Sales Return to submit:', voucher);
-
-      const response = await fetch('http://localhost:5000/api/sales-returns', {
-        method: 'POST',
+      // Call API to update the return
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/purchase-returns/${returnItem.id || returnItem._id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(voucher),
+        body: JSON.stringify({
+          date: formData.date,
+          description: formData.description,
+          numberOfEntries: entriesNum,
+        })
       });
 
       if (!response.ok) {
@@ -105,23 +108,27 @@ const EntrySalesReturn: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log('Sales return saved:', result);
-
+      
       if (result.success) {
-        showSnackbar(`Sales return created successfully! ID: ${voucher.id}`, 'success');
+        showSnackbar('Purchase return updated successfully!', 'success');
+        
+        // Update the return object and call onSave
+        const updatedReturn = {
+          ...returnItem,
+          date: formData.date,
+          description: formData.description,
+          numberOfEntries: entriesNum,
+        };
+        
+        setTimeout(() => {
+          onSave(updatedReturn);
+        }, 1500);
       } else {
-        throw new Error(result.message || 'Failed to save sales return');
+        throw new Error(result.message || 'Failed to update return');
       }
-
-      // Reset form
-      setDate(new Date().toISOString().split('T')[0]);
-      setNumberOfEntries(1);
-      setDescription('');
-      setVoucherId(generateVoucherId());
-
     } catch (error) {
-      console.error('Error creating Sales return:', error);
-      showSnackbar('Error creating Sales return', 'error');
+      console.error('Error updating return:', error);
+      showSnackbar('Error updating return', 'error');
     } finally {
       setLoading(false);
     }
@@ -129,11 +136,12 @@ const EntrySalesReturn: React.FC = () => {
 
   // Handle form reset
   const handleReset = () => {
-    setDate(new Date().toISOString().split('T')[0]);
-    setNumberOfEntries(1);
-    setDescription('');
-    setVoucherId(generateVoucherId());
-    showSnackbar('Form reset successfully', 'success');
+    setFormData({
+      date: returnItem.date,
+      description: returnItem.description,
+      numberOfEntries: returnItem.numberOfEntries.toString(),
+    });
+    showSnackbar('Form reset to original values', 'success');
   };
 
   return (
@@ -183,13 +191,14 @@ const EntrySalesReturn: React.FC = () => {
               flexDirection: { xs: 'column', sm: 'row' }
             }}
           >
-            <ReceiptIcon fontSize="large" />
-            Entry Sales Return
+            <EditIcon fontSize="large" />
+            Edit Purchase Return
           </Typography>
         </Box>
+
         {/* Return Details Section */}
         <Box sx={{ mb: { xs: 2, md: 3 } }}>
-          {/* Auto-Generated Return ID */}
+          {/* Return ID Display */}
           <Box sx={{
             backgroundColor: '#D9E1FA',
             p: { xs: 2, md: 3 },
@@ -203,10 +212,10 @@ const EntrySalesReturn: React.FC = () => {
           }}>
             <AutoIcon color="primary" />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Auto-Generated Return ID:
+              Editing Return ID:
             </Typography>
             <Chip
-              label={voucherId}
+              label={returnItem.id}
               color="primary"
               sx={{
                 fontFamily: 'monospace',
@@ -219,7 +228,7 @@ const EntrySalesReturn: React.FC = () => {
           </Box>
 
           {/* Form Fields Grid */}
-          <Box sx={{
+          <Box component="form" onSubmit={handleSubmit} sx={{
             display: "grid",
             gridTemplateColumns: {
               xs: '1fr',
@@ -237,8 +246,9 @@ const EntrySalesReturn: React.FC = () => {
                 type="date"
                 fullWidth
                 size="small"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                value={formData.date}
+                onChange={handleChange('date')}
+                required
                 variant="outlined"
                 slotProps={{
                   htmlInput: {
@@ -255,8 +265,9 @@ const EntrySalesReturn: React.FC = () => {
                 fullWidth
                 size="small"
                 type="number"
-                value={numberOfEntries}
-                onChange={(e) => setNumberOfEntries(Math.max(1, parseInt(e.target.value) || 1))}
+                value={formData.numberOfEntries}
+                onChange={handleChange('numberOfEntries')}
+                required
                 placeholder="1"
                 variant="outlined"
                 slotProps={{
@@ -274,7 +285,7 @@ const EntrySalesReturn: React.FC = () => {
               <TextField
                 fullWidth
                 size="small"
-                value="Draft"
+                value={returnItem.status || "Submitted"}
                 variant="outlined"
                 disabled
                 sx={{
@@ -295,8 +306,9 @@ const EntrySalesReturn: React.FC = () => {
               fullWidth
               multiline
               rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={formData.description}
+              onChange={handleChange('description')}
+              required
               placeholder="Enter return description..."
               variant="outlined"
             />
@@ -327,8 +339,23 @@ const EntrySalesReturn: React.FC = () => {
           </Button>
 
           <Button
+            variant="outlined"
+            onClick={onBack}
+            disabled={loading}
+            sx={{
+              px: { xs: 3, md: 4 },
+              py: { xs: 1.5, md: 1 },
+              fontSize: { xs: '1rem', md: '1.1rem' },
+              minWidth: { xs: '200px', md: 'auto' },
+              borderRadius: 1,
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            type="submit"
             variant="contained"
-            onClick={handleSubmit}
             disabled={loading}
             sx={{
               px: { xs: 3, md: 4 },
@@ -353,7 +380,7 @@ const EntrySalesReturn: React.FC = () => {
             ) : (
               <>
                 <SaveIcon sx={{ mr: 1 }} />
-                Submit Return
+                Save Changes
               </>
             )}
           </Button>
@@ -382,4 +409,4 @@ const EntrySalesReturn: React.FC = () => {
   );
 };
 
-export default EntrySalesReturn;
+export default EditPurchaseReturn;

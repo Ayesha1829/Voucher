@@ -28,7 +28,10 @@ import type { SelectChangeEvent } from "@mui/material";
 import {
   Visibility as ViewIcon,
   Print as PrintIcon,
+  Refresh as RefreshIcon,
 } from "@mui/icons-material";
+import SalesReturnDetail from "./salesReturnDetail";
+import EditSalesReturn from "./editSalesReturn";
 
 // Define interfaces for type safety
 interface SalesReturnVoucher {
@@ -71,8 +74,37 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
   const [apiLoading, setApiLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // Use API data if available, otherwise use props
-  const displayVouchers = apiVouchers.length > 0 ? apiVouchers : vouchers;
+  // Add state for selected voucher and view mode
+  const [selectedVoucher, setSelectedVoucher] = useState<SalesReturnVoucher | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
+  const [editMode, setEditMode] = useState(false);
+
+  // Conversion helpers
+  function toSalesReturn(voucher: SalesReturnVoucher): any {
+    return {
+      id: voucher.id,
+      _id: voucher._id,
+      date: voucher.dated, // map 'dated' to 'date'
+      description: voucher.description,
+      numberOfEntries: voucher.entries, // map 'entries' to 'numberOfEntries'
+      status: voucher.status,
+      createdAt: undefined,
+      updatedAt: undefined,
+    };
+  }
+  function toSalesReturnVoucher(returnItem: any): SalesReturnVoucher {
+    return {
+      id: returnItem.id,
+      _id: returnItem._id,
+      srvId: returnItem.id,
+      dated: returnItem.date,
+      description: returnItem.description,
+      entries: returnItem.numberOfEntries,
+      status: returnItem.status,
+      customerName: '',
+      totalAmount: undefined,
+    };
+  }
 
   // Fetch sales returns from API
   const fetchSalesReturns = async () => {
@@ -80,33 +112,50 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
       setApiLoading(true);
       setApiError(null);
 
-      console.log('Fetching sales returns from API...');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setApiError('No authentication token found. Please log in again.');
+        setApiLoading(false);
+        return;
+      }
 
-      const response = await fetch('http://localhost:5000/api/sales-returns', {
+      const response = await fetch('http://localhost:5000/api/sales-returns?page=1&limit=100', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        setApiError(`HTTP error! status: ${response.status}`);
+        setApiVouchers([]);
+        setApiLoading(false);
+        return;
       }
 
       const result = await response.json();
-      console.log('Sales returns API response:', result);
+      const items = result.data?.items || result.data || [];
 
-      if (result.success) {
-        const items = result.data?.items || result.data || [];
-        console.log('Setting sales returns:', items.length, 'items');
-        setApiVouchers(items);
-      } else {
-        throw new Error(result.message || 'Failed to fetch sales returns');
-      }
-    } catch (error) {
-      console.error('Error fetching sales returns:', error);
-      setApiError(error instanceof Error ? error.message : 'Unknown error');
-      // Don't show error to user, just use empty array
+      // Filter out voided returns for the main view
+      const activeReturns = items.filter((item: any) => item.status !== 'Voided');
+
+      // Robust mapping
+      const mappedReturns: SalesReturnVoucher[] = activeReturns.map((item: any) => ({
+        id: item._id || item.id || '',
+        _id: item._id || item.id,
+        srvId: item.srvId || item._id || item.id || '',
+        dated: item.dated || item.date || '',
+        description: item.description || '',
+        entries: Array.isArray(item.entries) ? item.entries.length : (item.entries ?? item.numberOfEntries ?? 0),
+        customerName: item.customerName || '',
+        totalAmount: item.totalAmount ?? undefined,
+        status: item.status || 'Submitted',
+      }));
+
+      setApiVouchers(mappedReturns);
+    } catch (error: any) {
+      setApiError(error.message || 'Failed to fetch returns');
       setApiVouchers([]);
     } finally {
       setApiLoading(false);
@@ -117,6 +166,9 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
   useEffect(() => {
     fetchSalesReturns();
   }, []);
+
+  // Use API data if available, otherwise use props
+  const displayVouchers = apiVouchers.length > 0 ? apiVouchers : vouchers;
 
   // Filter vouchers based on search term
   useEffect(() => {
@@ -161,6 +213,8 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
 
   // Action handlers
   const handleView = (voucher: SalesReturnVoucher) => {
+    setSelectedVoucher(voucher);
+    setViewMode('detail');
     if (onView) {
       onView(voucher);
     }
@@ -171,6 +225,61 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
       onPrint(voucher);
     }
   };
+
+  const handleEdit = (voucher: SalesReturnVoucher) => {
+    setSelectedVoucher(voucher);
+    setEditMode(true);
+  };
+
+  const handleEditSave = (updatedVoucher: SalesReturnVoucher) => {
+    // Update the voucher in the list
+    setApiVouchers((prev) => prev.map((v) => v.id === updatedVoucher.id ? updatedVoucher : v));
+    setSelectedVoucher(updatedVoucher);
+    setEditMode(false);
+    setViewMode('detail');
+  };
+
+  const handleEditBack = () => {
+    setEditMode(false);
+    setViewMode('detail');
+  };
+
+  // Handler for going back to list
+  const handleBack = () => {
+    setSelectedVoucher(null);
+    setViewMode('list');
+  };
+
+  // Handler for void (could be expanded to update list)
+  const handleVoid = (voucher: SalesReturnVoucher) => {
+    // Implement void logic or refresh list here
+    // For now, just log
+    console.log('Void voucher:', voucher);
+    handleBack(); // Go back to list after void
+  };
+
+  // Show edit mode if enabled
+  if (editMode && selectedVoucher) {
+    return (
+      <EditSalesReturn
+        returnItem={toSalesReturn(selectedVoucher)}
+        onBack={handleEditBack}
+        onSave={(updated) => handleEditSave(toSalesReturnVoucher(updated))}
+      />
+    );
+  }
+
+  // Show detail page if in detail mode
+  if (viewMode === 'detail' && selectedVoucher) {
+    return (
+      <SalesReturnDetail
+        returnItem={toSalesReturn(selectedVoucher)}
+        onBack={handleBack}
+        onEdit={(item) => handleEdit(toSalesReturnVoucher(item))}
+        onVoid={(item) => handleVoid(toSalesReturnVoucher(item))}
+      />
+    );
+  }
 
   return (
     <Box sx={{
@@ -465,30 +574,36 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
                         gap: { xs: 0.5, md: 1 },
                         justifyContent: "center"
                       }}>
-                        <Tooltip title="View Details">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleView(voucher)}
-                            sx={{
-                              padding: { xs: "4px", md: "8px" }
-                            }}
-                          >
-                            <ViewIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Print Sales Return">
-                          <IconButton
-                            size="small"
-                            color="secondary"
-                            onClick={() => handlePrint(voucher)}
-                            sx={{
-                              padding: { xs: "4px", md: "8px" }
-                            }}
-                          >
-                            <PrintIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<ViewIcon />}
+                          onClick={() => handleView(voucher)}
+                          sx={{
+                            backgroundColor: '#2196F3',
+                            '&:hover': { backgroundColor: '#1976D2' },
+                            textTransform: 'none',
+                            minWidth: '70px',
+                            color: 'white'
+                          }}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<PrintIcon />}
+                          onClick={() => handlePrint(voucher)}
+                          sx={{
+                            backgroundColor: '#4CAF50',
+                            '&:hover': { backgroundColor: '#388E3C' },
+                            textTransform: 'none',
+                            minWidth: '70px',
+                            color: 'white'
+                          }}
+                        >
+                          Print
+                        </Button>
                       </Box>
                     </TableCell>
                   </TableRow>

@@ -64,17 +64,54 @@ const VoidSalesVoucher: React.FC<VoidSalesVoucherProps> = ({
   // Use API data if available, otherwise use props
   const displayVouchers = apiVouchers.length > 0 ? apiVouchers : vouchers;
 
-  // Fetch voided sales vouchers from API (placeholder for future implementation)
+  // Fetch voided sales vouchers from API
   const fetchVoidedVouchers = async () => {
     try {
       setApiLoading(true);
-      
+
       console.log('Fetching voided sales vouchers...');
-      
-      // TODO: Replace with actual sales vouchers API when implemented
-      // For now, just set empty array
-      setApiVouchers([]);
-      
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/vouchers/sales', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+
+      if (!response.ok) {
+        console.log('Sales vouchers endpoint not available');
+        setApiVouchers([]);
+        return;
+      }
+
+      const result = await response.json();
+      console.log('Sales vouchers API response:', result);
+
+      if (result.success) {
+        const items = result.data?.vouchers || result.data?.items || result.data || [];
+        console.log('All sales vouchers:', items);
+        // Filter for voided vouchers only
+        const voidedItems = items.filter((item: any) => {
+          console.log('Checking voucher:', item.id, 'Status:', item.status);
+          return item.status === 'Voided';
+        });
+        console.log('Voided sales vouchers found:', voidedItems);
+
+        // Format for display
+        const formattedVouchers = voidedItems.map((item: any) => ({
+          id: item.id,
+          svId: item.id,
+          dated: item.date || item.dated,
+          description: item.description || `${item.entries} entries`,
+          entries: item.entries,
+          status: item.status
+        }));
+
+        setApiVouchers(formattedVouchers);
+      }
+
     } catch (error) {
       console.error('Error fetching voided sales vouchers:', error);
       setApiVouchers([]);

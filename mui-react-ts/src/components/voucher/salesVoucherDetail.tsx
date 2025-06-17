@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Paper,
@@ -23,27 +23,35 @@ import {
   Receipt as ReceiptIcon,
 } from '@mui/icons-material';
 
-// Interface for Purchase Voucher
-interface PurchaseVoucher {
+// Interface for Sales Voucher Item
+interface SalesVoucherItem {
+  itemName: string;
+  quantity: number;
+  rate: number;
+}
+
+// Interface for Sales Voucher
+interface SalesVoucher {
   id: string;
   _id?: string;
-  prvId: string;
-  dated: string;
-  description: string;
+  date: string;
+  dated?: string;
+  description?: string;
+  items: SalesVoucherItem[];
   entries: number;
   status?: 'Submitted' | 'Voided';
   createdAt?: string;
   updatedAt?: string;
 }
 
-interface PurchaseVoucherDetailProps {
-  voucher: PurchaseVoucher | null;
+interface SalesVoucherDetailProps {
+  voucher: SalesVoucher | null;
   onBack: () => void;
-  onEdit: (voucher: PurchaseVoucher) => void;
-  onVoid: (voucher: PurchaseVoucher) => void;
+  onEdit: (voucher: SalesVoucher) => void;
+  onVoid: (voucher: SalesVoucher) => void;
 }
 
-const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
+const SalesVoucherDetail: React.FC<SalesVoucherDetailProps> = ({
   voucher,
   onBack,
   onEdit,
@@ -87,7 +95,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
       const result = await response.json();
       
       if (result.success) {
-        showSnackbar('Purchase voucher voided successfully!', 'success');
+        showSnackbar('Sales voucher voided successfully!', 'success');
         setVoidDialogOpen(false);
         onVoid(voucher);
       } else {
@@ -168,7 +176,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
               fontWeight="bold"
               sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}
             >
-              Purchase Voucher Details
+              Sales Voucher Details
             </Typography>
           </Box>
         </Box>
@@ -187,7 +195,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                     Voucher ID
                   </Typography>
                   <Typography variant="h6" fontWeight="bold" color="primary">
-                    {voucher.prvId}
+                    {voucher.id}
                   </Typography>
                 </Box>
                 <Box>
@@ -195,7 +203,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                     Date
                   </Typography>
                   <Typography variant="body1">
-                    {voucher.dated}
+                    {voucher.date || voucher.dated}
                   </Typography>
                 </Box>
                 <Box>
@@ -221,7 +229,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                     Description
                   </Typography>
                   <Typography variant="body1">
-                    {voucher.description}
+                    {voucher.description || `${voucher.items?.length || 0} items`}
                   </Typography>
                 </Box>
               </Box>
@@ -289,12 +297,12 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
         <DialogTitle>Confirm Void Voucher</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to void this purchase voucher? This action cannot be undone.
+            Are you sure you want to void this sales voucher? This action cannot be undone.
           </Typography>
           <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-            <Typography variant="subtitle2">Voucher: {voucher.prvId}</Typography>
-            <Typography variant="body2">Date: {voucher.dated}</Typography>
-            <Typography variant="body2">Description: {voucher.description}</Typography>
+            <Typography variant="subtitle2">Voucher: {voucher.id}</Typography>
+            <Typography variant="body2">Date: {voucher.date || voucher.dated}</Typography>
+            <Typography variant="body2">Description: {voucher.description || `${voucher.items?.length || 0} items`}</Typography>
           </Box>
         </DialogContent>
         <DialogActions>
@@ -329,4 +337,4 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
   );
 };
 
-export default PurchaseVoucherDetail;
+export default SalesVoucherDetail;

@@ -72,10 +72,12 @@ const VoidPurchaseVoucher: React.FC<VoidPurchaseVoucherProps> = ({
       console.log('Fetching voided purchase vouchers...');
 
       // For now, we'll get all vouchers and filter for voided ones
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/vouchers/purchase', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         }
       });
 
@@ -90,9 +92,25 @@ const VoidPurchaseVoucher: React.FC<VoidPurchaseVoucherProps> = ({
 
       if (result.success) {
         const items = result.data?.vouchers || result.data?.items || result.data || [];
+        console.log('All purchase vouchers:', items);
         // Filter for voided vouchers only
-        const voidedItems = items.filter((item: any) => item.status === 'Voided');
-        setApiVouchers(voidedItems);
+        const voidedItems = items.filter((item: any) => {
+          console.log('Checking voucher:', item.id, 'Status:', item.status);
+          return item.status === 'Voided';
+        });
+        console.log('Voided purchase vouchers found:', voidedItems);
+
+        // Format for display
+        const formattedVouchers = voidedItems.map((item: any) => ({
+          id: item.id,
+          prvId: item.id,
+          dated: item.date || item.dated,
+          description: item.description || `${item.entries} entries`,
+          entries: item.entries,
+          status: item.status
+        }));
+
+        setApiVouchers(formattedVouchers);
       }
     } catch (error) {
       console.error('Error fetching voided vouchers:', error);
