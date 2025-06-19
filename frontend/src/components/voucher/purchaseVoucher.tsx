@@ -27,6 +27,8 @@ interface PurchaseItem {
   unit: string;
   gst: number;
   total: number;
+  debit?: number;   // Added
+  credit?: number;  // Added
 }
 
 interface Supplier {
@@ -89,6 +91,8 @@ const PurchaseVoucher: React.FC = () => {
       unit: "",
       gst: 0,
       total: 0,
+      debit: 0,    // Added
+      credit: 0,   // Added
     },
   ]);
 
@@ -146,6 +150,8 @@ const PurchaseVoucher: React.FC = () => {
       unit: "",
       gst: 0,
       total: 0,
+      debit: 0,    // Added
+      credit: 0,   // Added
     };
     setPurchaseItems([...purchaseItems, newItem]);
   };
@@ -221,6 +227,8 @@ const PurchaseVoucher: React.FC = () => {
           unit: "",
           gst: 0,
           total: 0,
+          debit: 0,    // Added
+          credit: 0,   // Added
         },
       ]);
     } catch (error) {
@@ -305,7 +313,7 @@ const PurchaseVoucher: React.FC = () => {
             </Box>
             <Box>
               <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                Supplier
+                Party
               </Typography>
               <Autocomplete
                 size="small"
@@ -350,9 +358,14 @@ const PurchaseVoucher: React.FC = () => {
                 size="small"
                 type="number"
                 value={closingBalance}
-                onChange={(e) => setClosingBalance(e.target.value)}
                 placeholder="0.00"
                 variant="outlined"
+                InputProps={{
+                  readOnly: true,
+                  sx: {
+                    backgroundColor: "#f5f5f5" // grey background, matches total field
+                  }
+                }}
               />
             </Box>
           </Box>
@@ -511,6 +524,31 @@ const PurchaseVoucher: React.FC = () => {
                   </Box>
                 </Box>
 
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Debit</Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.debit || ""}
+                      onChange={(e) => handleInputChange(item.id, "debit", Number(e.target.value))}
+                      placeholder="0"
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Credit</Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.credit || ""}
+                      onChange={(e) => handleInputChange(item.id, "credit", Number(e.target.value))}
+                      placeholder="0"
+                    />
+                  </Box>
+                </Box>
+
                 <Box sx={{ p: 1, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
                   <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Total</Typography>
                   <Typography variant="h6" color="success.main" fontWeight="bold">
@@ -554,8 +592,12 @@ const PurchaseVoucher: React.FC = () => {
                   TOTAL
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", minWidth: 100, p: 2 }}>
-                  ACTIONS
+                  Debit
                 </TableCell>
+                <TableCell sx={{ fontWeight: "bold", minWidth: 100, p: 2 }}>
+                  Credit
+                </TableCell>
+                {/* Removed ACTIONS column */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -714,23 +756,40 @@ const PurchaseVoucher: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
-                    {purchaseItems.length > 1 && (
-                      <IconButton
-                        color="error"
-                        onClick={() => {
-                          setPurchaseItems(purchaseItems.filter(i => i.id !== item.id));
-                        }}
-                        size="small"
-                        sx={{
-                          "&:hover": {
-                            backgroundColor: "#ffebee",
-                          },
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    )}
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.debit || ""}
+                      onChange={(e) =>
+                        handleInputChange(
+                          item.id,
+                          "debit",
+                          Number(e.target.value)
+                        )
+                      }
+                      placeholder="0"
+                      variant="outlined"
+                    />
                   </TableCell>
+                  <TableCell sx={{ p: 2 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.credit || ""}
+                      onChange={(e) =>
+                        handleInputChange(
+                          item.id,
+                          "credit",
+                          Number(e.target.value)
+                        )
+                      }
+                      placeholder="0"
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  {/* Removed ACTIONS cell */}
                 </TableRow>
               ))}
             </TableBody>

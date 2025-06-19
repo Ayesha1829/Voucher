@@ -172,7 +172,7 @@ const VoidPurchaseReturn: React.FC<VoidPurchaseReturnProps> = ({
           {/* Header */}
           <Box
             sx={{
-              backgroundColor: "#D9E1FA",
+              backgroundColor: "#C68FFD",
               color: "black",
               py: { xs: 1.5, md: 2 },
               px: { xs: 2, md: 3 },

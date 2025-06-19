@@ -27,9 +27,12 @@ interface SalesItem {
   rate: number;
   category: string;
   detail: string;
-  disc: number;
-  exDisc: number;
+  disc: number;      // Discount amount
+  discPercent: number; // Discount percentage
+  exDisc: number;    // Extra discount percentage
   total: number;
+  debit?: number;
+  credit?: number;
 }
 
 interface Party {
@@ -86,8 +89,11 @@ const SalesVoucher: React.FC = () => {
       category: "",
       detail: "",
       disc: 0,
+      discPercent: 0,
       exDisc: 0,
       total: 0,
+      debit: 0,
+      credit: 0,
     },
   ]);
 
@@ -124,14 +130,22 @@ const SalesVoucher: React.FC = () => {
           const updatedItem = { ...item, [field]: value };
 
           // Recalculate total when relevant fields change
-          if (["dzn", "pcs", "rate", "disc", "exDisc"].includes(field)) {
-            updatedItem.total = calculateTotal(
-              field === "dzn" ? Number(value) : item.dzn,
-              field === "pcs" ? Number(value) : item.pcs,
-              field === "rate" ? Number(value) : item.rate,
-              field === "disc" ? Number(value) : item.disc,
-              field === "exDisc" ? Number(value) : item.exDisc
-            );
+          if (["dzn", "pcs", "rate", "disc", "discPercent", "exDisc"].includes(field)) {
+            const totalPieces = field === "dzn" ? Number(value) : item.dzn;
+            const pcs = field === "pcs" ? Number(value) : item.pcs;
+            const rate = field === "rate" ? Number(value) : item.rate;
+            const disc = field === "disc" ? Number(value) : item.disc;
+            const discPercent = field === "discPercent" ? Number(value) : item.discPercent;
+            const exDisc = field === "exDisc" ? Number(value) : item.exDisc;
+
+            let subtotal = (totalPieces * 12 + pcs) * rate;
+            let discAmount = disc;
+            if (discPercent > 0) {
+              discAmount += (subtotal * discPercent) / 100;
+            }
+            let afterDisc = subtotal - discAmount;
+            let exDiscAmount = (afterDisc * exDisc) / 100;
+            updatedItem.total = afterDisc - exDiscAmount;
           }
 
           return updatedItem;
@@ -152,8 +166,11 @@ const SalesVoucher: React.FC = () => {
       category: "",
       detail: "",
       disc: 0,
+      discPercent: 0,
       exDisc: 0,
       total: 0,
+      debit: 0,
+      credit: 0,
     };
     setSalesItems([...salesItems, newItem]);
   };
@@ -232,6 +249,7 @@ const SalesVoucher: React.FC = () => {
           category: "",
           detail: "",
           disc: 0,
+          discPercent: 0,
           exDisc: 0,
           total: 0,
         },
@@ -377,9 +395,14 @@ const SalesVoucher: React.FC = () => {
                 size="small"
                 type="number"
                 value={closingBalance}
-                onChange={(e) => setClosingBalance(e.target.value)}
                 placeholder="0.00"
                 variant="outlined"
+                InputProps={{
+                  readOnly: true,
+                  sx: {
+                    backgroundColor: "#f5f5f5" // grey background, matches total field
+                  }
+                }}
               />
             </Box>
           </Box>
@@ -517,9 +540,9 @@ const SalesVoucher: React.FC = () => {
                   />
                 </Box>
 
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1 }}>
                   <Box>
-                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Disc (%)</Typography>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Disc</Typography>
                     <TextField
                       fullWidth
                       size="small"
@@ -527,6 +550,20 @@ const SalesVoucher: React.FC = () => {
                       value={item.disc || ""}
                       onChange={(e) => handleInputChange(item.id, "disc", Number(e.target.value))}
                       placeholder="0"
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>Disc (%)</Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.discPercent || ""}
+                      onChange={(e) => handleInputChange(item.id, "discPercent", Number(e.target.value))}
+                      placeholder="0"
+                      InputProps={{
+                        endAdornment: <span style={{ color: '#888', fontSize: 12 }}>%</span>
+                      }}
                     />
                   </Box>
                   <Box>
@@ -538,6 +575,9 @@ const SalesVoucher: React.FC = () => {
                       value={item.exDisc || ""}
                       onChange={(e) => handleInputChange(item.id, "exDisc", Number(e.target.value))}
                       placeholder="0"
+                      InputProps={{
+                        endAdornment: <span style={{ color: '#888', fontSize: 12 }}>%</span>
+                      }}
                     />
                   </Box>
                 </Box>
@@ -585,14 +625,21 @@ const SalesVoucher: React.FC = () => {
                   Disc
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", minWidth: 100, p: 2 }}>
-                  Ex.Disc
+                  Disc%
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", minWidth: 100, p: 2 }}>
+                  Ex.Disc%
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", minWidth: 140, p: 2 }}>
                   Total
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", minWidth: 100, p: 2 }}>
-                  ACTIONS
+                  Debit
                 </TableCell>
+                <TableCell sx={{ fontWeight: "bold", minWidth: 100, p: 2 }}>
+                  Credit
+                </TableCell>
+                {/* Removed ACTIONS column */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -741,6 +788,26 @@ const SalesVoucher: React.FC = () => {
                       fullWidth
                       size="small"
                       type="number"
+                      value={item.discPercent || ""}
+                      onChange={(e) =>
+                        handleInputChange(
+                          item.id,
+                          "discPercent",
+                          Number(e.target.value)
+                        )
+                      }
+                      placeholder="0"
+                      variant="outlined"
+                      InputProps={{
+                        endAdornment: <span style={{ color: '#888', fontSize: 12 }}>%</span>
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ p: 2 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
                       value={item.exDisc || ""}
                       onChange={(e) =>
                         handleInputChange(
@@ -751,6 +818,9 @@ const SalesVoucher: React.FC = () => {
                       }
                       placeholder="0"
                       variant="outlined"
+                      InputProps={{
+                        endAdornment: <span style={{ color: '#888', fontSize: 12 }}>%</span>
+                      }}
                     />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
@@ -768,23 +838,40 @@ const SalesVoucher: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell sx={{ p: 2 }}>
-                    {salesItems.length > 1 && (
-                      <IconButton
-                        color="error"
-                        onClick={() => {
-                          setSalesItems(salesItems.filter(i => i.id !== item.id));
-                        }}
-                        size="small"
-                        sx={{
-                          "&:hover": {
-                            backgroundColor: "#ffebee",
-                          },
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    )}
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.debit || ""}
+                      onChange={(e) =>
+                        handleInputChange(
+                          item.id,
+                          "debit",
+                          Number(e.target.value)
+                        )
+                      }
+                      placeholder="0"
+                      variant="outlined"
+                    />
                   </TableCell>
+                  <TableCell sx={{ p: 2 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      value={item.credit || ""}
+                      onChange={(e) =>
+                        handleInputChange(
+                          item.id,
+                          "credit",
+                          Number(e.target.value)
+                        )
+                      }
+                      placeholder="0"
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  {/* Removed ACTIONS cell */}
                 </TableRow>
               ))}
             </TableBody>
