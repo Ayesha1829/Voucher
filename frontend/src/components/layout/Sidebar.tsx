@@ -46,7 +46,7 @@ const StyledDrawer = styled(Drawer)(() => ({
     width: drawerWidth,
     boxSizing: "border-box",
     backgroundColor: "#ffffff",
-    borderRight: "2px solid #D9E1FA",
+    borderRight: "2px solid #FFFFFF",
     top: 0, // Position from the very top
     height: "100vh", // Full viewport height
     zIndex: 1400, // Higher z-index to overlay header and content
@@ -57,10 +57,10 @@ const StyledDrawer = styled(Drawer)(() => ({
 }));
 
 const SidebarHeader = styled(Box)(() => ({
-  backgroundColor: "#D9E1FA",
+  backgroundColor: "#FFFFFF",
   padding: "20px 16px",
   textAlign: "center",
-  borderBottom: "2px solid #B8C5F2",
+  borderBottom: "2px solid #E0E0E0",
   flexShrink: 0, // Don't shrink the header
 }));
 
@@ -83,10 +83,10 @@ const ScrollableMenuContainer = styled(Box)(() => ({
     borderRadius: "3px",
   },
   "&::-webkit-scrollbar-thumb": {
-    backgroundColor: "#D9E1FA",
+    backgroundColor: "#0645B1",
     borderRadius: "3px",
     "&:hover": {
-      backgroundColor: "#B8C5F2",
+      backgroundColor: "#0645B1",
     },
   },
 }));
@@ -104,13 +104,13 @@ const StyledSearchField = styled(TextField)(() => ({
     backgroundColor: "#f8f9ff",
     borderRadius: "8px",
     "& fieldset": {
-      borderColor: "#D9E1FA",
+      borderColor: "#E0E0E0",
     },
     "&:hover fieldset": {
-      borderColor: "#B8C5F2",
+      borderColor: "#CCCCCC",
     },
     "&.Mui-focused fieldset": {
-      borderColor: "#9BB0E8",
+      borderColor: "#999999",
     },
   },
   "& .MuiInputBase-input": {
@@ -125,9 +125,9 @@ const StyledListItemButton = styled(ListItemButton)(() => ({
     backgroundColor: "#f8f9ff",
   },
   "&.Mui-selected": {
-    backgroundColor: "#D9E1FA",
+    backgroundColor: "#F0F0F0",
     "&:hover": {
-      backgroundColor: "#B8C5F2",
+      backgroundColor: "#E0E0E0",
     },
   },
 }));
@@ -140,7 +140,7 @@ const SubListItem = styled(ListItemButton)(() => ({
     backgroundColor: "#f8f9ff",
   },
   "&.Mui-selected": {
-    backgroundColor: "#D9E1FA",
+    backgroundColor: "white",
     "&:hover": {
       backgroundColor: "#B8C5F2",
     },

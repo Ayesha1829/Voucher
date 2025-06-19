@@ -386,7 +386,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: 'white'
     }}>
       {/* Header */}
       <Paper elevation={3} sx={{
@@ -403,7 +403,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
             sx={{
               fontWeight: "bold",
               color: "black",
-              backgroundColor: "#C68FFD",
+              backgroundColor: "#0645B1",
               py: { xs: 1.5, md: 2 },
               px: { xs: 2, md: 3 },
               borderRadius: 1,
@@ -433,7 +433,7 @@ const StocksItemList: React.FC<StockItemListProps> = ({
               disabled={loading}
               color="primary"
               sx={{
-                backgroundColor: '#D9E1FA',
+                backgroundColor: 'white',
                 '&:hover': { backgroundColor: '#B8C5F2' }
               }}
             >

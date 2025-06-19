@@ -23,12 +23,12 @@ const FloatingMenuButton = styled(Fab)(() => ({
   position: "fixed",
   top: "20px",
   left: "20px",
-  backgroundColor: "#D9E1FA",
-  color: "#ffffff",
+  backgroundColor: "#FFFFFF",
+  color: "#333333",
   zIndex: 1300,
   boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)",
   "&:hover": {
-    backgroundColor: "#B8C5F2",
+    backgroundColor: "#F5F5F5",
   },
 }));
 
@@ -56,7 +56,7 @@ const Layout: React.FC<LayoutProps> = ({
       sx={{
         display: "flex",
         minHeight: "calc(100vh - 64px)",
-        backgroundColor: "#D9E1FA",
+        backgroundColor: "#FFFFFF",
       }}
     >
       <CssBaseline />
@@ -80,7 +80,7 @@ const Layout: React.FC<LayoutProps> = ({
       <Main>
         <Box
           sx={{
-            backgroundColor: "#D9E1FA",
+            backgroundColor: "#FFFFFF",
             minHeight: "calc(100vh - 64px)",
             borderRadius: "0",
             padding: 0,

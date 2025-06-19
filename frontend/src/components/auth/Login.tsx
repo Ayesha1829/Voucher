@@ -83,7 +83,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             height: 64,
             mb: 2,
             borderRadius: "50%",
-            background: "linear-gradient(135deg, #B8C5F2 0%, #D9E1FA 100%)",
+            background: "linear-gradient(135deg, #E0E0E0 0%, #FFFFFF 100%)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -150,11 +150,11 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               fontWeight: 600,
               fontSize: "1rem",
               borderRadius: 2,
-              background: "linear-gradient(135deg, #B8C5F2 0%, #D9E1FA 100%)",
+              background: "linear-gradient(135deg, #B8C5F2 0%, white 100%)",
               color: "#2d3a4a",
               boxShadow: "0 2px 8px 0 rgba(31, 38, 135, 0.08)",
               "&:hover": {
-                background: "linear-gradient(135deg, #D9E1FA 0%, #B8C5F2 100%)",
+                background: "linear-gradient(135deg, white 0%, #B8C5F2 100%)",
               },
             }}
             disabled={loading}

@@ -231,24 +231,24 @@ const ViewPurchaseVoucher: React.FC = () => {
         marginLeft: { xs: '0', md: 'calc(-50vw + 20vw)' },
         marginRight: { xs: '0', md: '-50vw' },
         padding: { xs: '16px', md: '24px' },
-        backgroundColor: '#D9E1FA',
+        backgroundColor: '#FFFFFF',
         minHeight: 'calc(100vh - 64px)',
       }}
     >
       {/* Header Card */}
       <Box
         sx={{
-          backgroundColor: '#D9E1FA',
+          backgroundColor: '#0645B1',
           padding: '16px',
           borderRadius: '12px',
           marginBottom: '24px',
-          border: '1px solid #B8C5F2',
+          border: '1px solid #0645B1',
         }}
       >
         <Typography
           variant="h4"
           sx={{
-            color: '#333',
+            color: '#FFFFFF',
             fontWeight: 'bold',
             textAlign: 'center',
           }}
@@ -304,10 +304,10 @@ const ViewPurchaseVoucher: React.FC = () => {
               onClick={fetchVouchers}
               disabled={loading}
               sx={{
-                borderColor: '#D9E1FA',
-                color: '#333',
+                borderColor: '#0645B1',
+                color: '#0645B1',
                 '&:hover': {
-                  borderColor: '#B8C5F2',
+                  borderColor: '#0645B1',
                   backgroundColor: '#f8f9ff',
                 },
               }}
@@ -360,7 +360,7 @@ const ViewPurchaseVoucher: React.FC = () => {
           <Table>
             {/* Table Header */}
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#C68FFD' }}>
+              <TableRow sx={{ backgroundColor: '#0645B1' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                   PV ID #
                 </TableCell>
@@ -476,10 +476,10 @@ const ViewPurchaseVoucher: React.FC = () => {
               sx={{
                 '& .MuiPaginationItem-root': {
                   backgroundColor: '#f8f9ff',
-                  '&:hover': { backgroundColor: '#D9E1FA' },
+                  '&:hover': { backgroundColor: '#E3F2FD' },
                   '&.Mui-selected': {
-                    backgroundColor: '#D9E1FA',
-                    color: '#333',
+                    backgroundColor: '#0645B1',
+                    color: '#FFFFFF',
                   },
                 },
               }}

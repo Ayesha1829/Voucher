@@ -228,14 +228,14 @@ const ViewSalesReturn: React.FC = () => {
         marginLeft: { xs: '0', md: 'calc(-50vw + 20vw)' },
         marginRight: { xs: '0', md: '-50vw' },
         padding: { xs: '16px', md: '24px' },
-        backgroundColor: '#D9E1FA',
+        backgroundColor: 'white',
         minHeight: 'calc(100vh - 64px)',
       }}
     >
       {/* Header Card */}
       <Box
         sx={{
-          backgroundColor: '#D9E1FA',
+          backgroundColor: 'white',
           padding: '16px',
           borderRadius: '12px',
           marginBottom: '24px',
@@ -301,7 +301,7 @@ const ViewSalesReturn: React.FC = () => {
               onClick={fetchReturns}
               disabled={loading}
               sx={{
-                borderColor: '#D9E1FA',
+                borderColor: 'white',
                 color: '#333',
                 '&:hover': {
                   borderColor: '#B8C5F2',
@@ -357,7 +357,7 @@ const ViewSalesReturn: React.FC = () => {
           <Table>
             {/* Table Header */}
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#C68FFD' }}>
+              <TableRow sx={{ backgroundColor: '#0645B1' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                   SR ID #
                 </TableCell>
@@ -477,10 +477,10 @@ const ViewSalesReturn: React.FC = () => {
               sx={{
                 '& .MuiPaginationItem-root': {
                   backgroundColor: '#f8f9ff',
-                  '&:hover': { backgroundColor: '#D9E1FA' },
+                  '&:hover': { backgroundColor: '#E3F2FD' },
                   '&.Mui-selected': {
-                    backgroundColor: '#D9E1FA',
-                    color: '#333',
+                    backgroundColor: '#0645B1',
+                    color: '#FFFFFF',
                   },
                 },
               }}

@@ -160,7 +160,7 @@ const AddCategory: React.FC = () => {
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: '#FFFFFF'
     }}>
       {/* Main Content Container */}
       <Box sx={{ width: '100%', mx: 'auto' }}>
@@ -178,8 +178,8 @@ const AddCategory: React.FC = () => {
             sx={{
               mb: { xs: 2, md: 3 },
               fontWeight: "bold",
-              color: "black",
-              backgroundColor: "#C68FFD",
+              color: "white",
+              backgroundColor: "#0645B1",
               py: { xs: 1.5, md: 2 },
               borderRadius: 1,
               fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' }
@@ -222,7 +222,7 @@ const AddCategory: React.FC = () => {
                     fontSize: { xs: '14px', md: '16px' },
                     '& fieldset': {
                       borderWidth: '2px',
-                      borderColor: '#D9E1FA',
+                      borderColor: 'white',
                     },
                     '&:hover fieldset': {
                       borderColor: '#B8C5F2',
@@ -309,7 +309,7 @@ const AddCategory: React.FC = () => {
                   fontWeight: 'bold',
                   borderRadius: { xs: 1, md: 2 },
                   borderWidth: '2px',
-                  borderColor: '#D9E1FA',
+                  borderColor: 'white',
                   color: '#333',
                   "&:hover": {
                     borderColor: '#B8C5F2',
@@ -358,7 +358,7 @@ const AddCategory: React.FC = () => {
                 py: 8,
                 backgroundColor: '#f8f9ff',
                 borderRadius: 3,
-                border: '3px dashed #D9E1FA'
+                border: '3px dashed white'
               }}>
                 <Typography
                   variant="h5"
@@ -412,7 +412,7 @@ const AddCategory: React.FC = () => {
                           border: '2px solid #e0e0e0',
                           '&:hover': {
                             backgroundColor: '#f0f7ff',
-                            borderColor: '#D9E1FA',
+                            borderColor: 'white',
                             transform: 'translateY(-2px)',
                           },
                           transition: 'all 0.3s ease-in-out',
@@ -429,7 +429,7 @@ const AddCategory: React.FC = () => {
                                 label={`ID: ${category._id.slice(-6)}`}
                                 size="medium"
                                 sx={{
-                                  backgroundColor: '#D9E1FA',
+                                  backgroundColor: 'white',
                                   color: '#333',
                                   fontFamily: 'monospace',
                                   fontSize: '14px',

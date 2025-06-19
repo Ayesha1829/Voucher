@@ -123,7 +123,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: 'white'
     }}>
       {/* Header */}
       <Paper elevation={3} sx={{
@@ -133,7 +133,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
         width: '100%'
       }}>
         <Box sx={{
-          backgroundColor: "#D9E1FA",
+          backgroundColor: "white",
           color: "black",
           py: { xs: 1.5, md: 2 },
           px: { xs: 2, md: 3 },

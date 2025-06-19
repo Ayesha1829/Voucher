@@ -149,7 +149,7 @@ const EntryPurchaseReturn: React.FC = () => {
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: 'white'
     }}>
       {/* Main Content Container */}
       <Box sx={{ width: '100%', mx: 'auto' }}>
@@ -163,8 +163,8 @@ const EntryPurchaseReturn: React.FC = () => {
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#C68FFD",
-            color: "black",
+            backgroundColor: "#0645B1",
+            color: "white",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },
             borderRadius: 1,
@@ -193,7 +193,8 @@ const EntryPurchaseReturn: React.FC = () => {
         <Box sx={{ mb: { xs: 2, md: 3 } }}>
           {/* Auto-Generated Return ID */}
           <Box sx={{
-            backgroundColor: '#D9E1FA',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E0E0E0',
             p: { xs: 2, md: 3 },
             borderRadius: 1,
             mb: { xs: 2, md: 3 },

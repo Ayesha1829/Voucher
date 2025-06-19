@@ -160,7 +160,7 @@ const VoidSalesReturn: React.FC<VoidSalesReturnProps> = ({
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: 'white'
     }}>
       {/* Header */}
       <Paper elevation={3} sx={{
@@ -176,8 +176,8 @@ const VoidSalesReturn: React.FC<VoidSalesReturnProps> = ({
           sx={{
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
-            color: "black",
-            backgroundColor: "#C68FFD",
+            color: "white",
+            backgroundColor: "#0645B1",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,

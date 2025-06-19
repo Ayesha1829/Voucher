@@ -248,24 +248,24 @@ const ViewSalesVoucher: React.FC = () => {
         marginLeft: { xs: '0', md: 'calc(-50vw + 20vw)' },
         marginRight: { xs: '0', md: '-50vw' },
         padding: { xs: '16px', md: '24px' },
-        backgroundColor: '#D9E1FA',
+        backgroundColor: '#FFFFFF',
         minHeight: 'calc(100vh - 64px)',
       }}
     >
       {/* Header Card */}
       <Box
         sx={{
-          backgroundColor: '#D9E1FA',
+          backgroundColor: '#0645B1',
           padding: '16px',
           borderRadius: '12px',
           marginBottom: '24px',
-          border: '1px solid #B8C5F2',
+          border: '1px solid #0645B1',
         }}
       >
         <Typography
           variant="h4"
           sx={{
-            color: '#333',
+            color: '#FFFFFF',
             fontWeight: 'bold',
             textAlign: 'center',
           }}
@@ -321,7 +321,7 @@ const ViewSalesVoucher: React.FC = () => {
               onClick={fetchVouchers}
               disabled={loading}
               sx={{
-                borderColor: '#D9E1FA',
+                borderColor: 'white',
                 color: '#333',
                 '&:hover': {
                   borderColor: '#B8C5F2',
@@ -377,7 +377,7 @@ const ViewSalesVoucher: React.FC = () => {
           <Table>
             {/* Table Header */}
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#C68FFD' }}>
+              <TableRow sx={{ backgroundColor: '#0645B1' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                   SV ID #
                 </TableCell>
@@ -450,7 +450,7 @@ const ViewSalesVoucher: React.FC = () => {
                           startIcon={<PrintIcon />}
                           onClick={() => handlePrint(voucher.id)}
                           sx={{
-                            backgroundColor: '#C68FFD',
+                            backgroundColor: '#4CAF50',
                             '&:hover': { backgroundColor: '#388E3C' },
                             textTransform: 'none',
                           }}
@@ -493,10 +493,10 @@ const ViewSalesVoucher: React.FC = () => {
               sx={{
                 '& .MuiPaginationItem-root': {
                   backgroundColor: '#f8f9ff',
-                  '&:hover': { backgroundColor: '#D9E1FA' },
+                  '&:hover': { backgroundColor: '#E3F2FD' },
                   '&.Mui-selected': {
-                    backgroundColor: '#D9E1FA',
-                    color: '#333',
+                    backgroundColor: '#0645B1',
+                    color: '#FFFFFF',
                   },
                 },
               }}

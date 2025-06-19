@@ -176,7 +176,7 @@ const VoidSalesVoucher: React.FC<VoidSalesVoucherProps> = ({
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: '#FFFFFF'
     }}>
       {/* Header */}
       <Paper elevation={3} sx={{
@@ -193,7 +193,8 @@ const VoidSalesVoucher: React.FC<VoidSalesVoucherProps> = ({
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "black",
-            backgroundColor: "#C68FFD",
+            backgroundColor: "#0645B1",
+            color: "white",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,

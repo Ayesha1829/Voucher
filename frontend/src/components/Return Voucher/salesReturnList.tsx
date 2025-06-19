@@ -292,7 +292,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: 'white'
     }}>
       {/* Header */}
       <Paper elevation={3} sx={{
@@ -309,8 +309,8 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
           sx={{
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
-            color: "black",
-            backgroundColor: "#C68FFD",
+            color: "white",
+            backgroundColor: "#0645B1",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,
@@ -428,7 +428,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
                       <Chip
                         label={`${voucher.entries} entries`}
                         size="small"
-                        sx={{ backgroundColor: "#D9E1FA", color: "#333" }}
+                        sx={{ backgroundColor: "white", color: "#333" }}
                       />
                     </Box>
 
@@ -650,7 +650,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
               disabled={currentPage === 1 || filteredVouchers.length === 0}
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               sx={{
-                borderColor: "#D9E1FA",
+                borderColor: "white",
                 color: "#333",
                 fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 minWidth: { xs: "70px", sm: "auto" },
@@ -676,7 +676,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
               sx={{
                 "& .MuiPaginationItem-root": {
                   color: "#333",
-                  borderColor: "#D9E1FA",
+                  borderColor: "#E0E0E0",
                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
                   minWidth: { xs: "28px", sm: "32px" },
                   height: { xs: "28px", sm: "32px" },
@@ -684,10 +684,10 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
                     backgroundColor: "#f5f5f5",
                   },
                   "&.Mui-selected": {
-                    backgroundColor: "#D9E1FA",
-                    color: "#333",
+                    backgroundColor: "#0645B1",
+                    color: "#FFFFFF",
                     "&:hover": {
-                      backgroundColor: "#B8C5F2",
+                      backgroundColor: "#0645B1",
                     },
                   },
                 },
@@ -704,7 +704,7 @@ const SalesReturnList: React.FC<SalesReturnListProps> = ({
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
               sx={{
-                borderColor: "#D9E1FA",
+                borderColor: "white",
                 color: "#333",
                 fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 minWidth: { xs: "70px", sm: "auto" },

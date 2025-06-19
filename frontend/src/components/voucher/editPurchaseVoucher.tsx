@@ -289,7 +289,7 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: '#FFFFFF'
     }}>
       {/* Main Content Container */}
       <Box sx={{ width: '100%', mx: 'auto' }}>
@@ -303,8 +303,8 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#C68FFD",
-            color: "black",
+            backgroundColor: "#0645B1",
+            color: "white",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },
             borderRadius: 1,
@@ -332,10 +332,11 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
 
         {/* Voucher ID Display */}
         <Box sx={{
-          backgroundColor: '#D9E1FA',
+          backgroundColor: '#FFFFFF',
           p: { xs: 2, md: 3 },
           borderRadius: 1,
           mb: { xs: 2, md: 3 },
+          border: '1px solid #E0E0E0',
           display: 'flex',
           alignItems: 'center',
           gap: 2,
@@ -449,7 +450,7 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#C68FFD' }}>
+                  <TableRow sx={{ backgroundColor: '#0645B1' }}>
                     <TableCell sx={{ color: 'white', fontWeight: 'bold', minWidth: 150 }}>
                       Item Name
                     </TableCell>
@@ -594,8 +595,8 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
               startIcon={<AddIcon />}
               onClick={addNewRow}
               sx={{
-                borderColor: '#C68FFD',
-                color: '#C68FFD',
+                borderColor: '#0645B1',
+                color: '#0645B1',
                 '&:hover': {
                   borderColor: '#B575E8',
                   backgroundColor: '#f8f4ff',

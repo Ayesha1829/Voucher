@@ -23,19 +23,21 @@ import VoidSalesVoucher from "./components/voucher/voidSalesVoucher";
 import VoidSalesReturn from "./components/Return Voucher/voidSalesReturn";
 import VoidPurchaseReturn from "./components/Return Voucher/voidPurchaseReturn";
 import Login from "./components/auth/Login";
+import AddGatePass from "./components/gatePass/addGatePass";
+import ViewGatePass from "./components/gatePass/viewGatePass";
 import "./App.css";
 
 // Create a custom theme
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#D9E1FA",
+      main: "#FFFFFF",
     },
     secondary: {
       main: "#ffffff",
     },
     background: {
-      default: "#D9E1FA",
+      default: "#FFFFFF",
     },
   },
   typography: {
@@ -142,6 +144,10 @@ function App() {
         return <ViewSalesVoucher />;
       case "void-sales-voucher":
         return <VoidSalesVoucher />;
+      case "add-gate-pass":
+        return <AddGatePass />;
+      case "view-gate-pass":
+        return <ViewGatePass />;
       case "reports":
         return (
           <div style={{ padding: "20px", textAlign: "center" }}>
@@ -172,7 +178,7 @@ function App() {
             justifyContent: "center",
             alignItems: "center",
             minHeight: "100vh",
-            backgroundColor: "#D9E1FA",
+            backgroundColor: "#FFFFFF",
           }}
         >
           <div>Loading...</div>

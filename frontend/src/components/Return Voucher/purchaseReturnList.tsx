@@ -247,7 +247,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
       py: { xs: 2, md: 4 },
       px: { xs: 2, md: 6 },
       minHeight: '100vh',
-      backgroundColor: '#D9E1FA'
+      backgroundColor: 'white'
     }}>
       {/* Header */}
       <Paper elevation={3} sx={{
@@ -265,7 +265,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "black",
-            backgroundColor: "#C68FFD",
+            backgroundColor: "#0645B1",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,
@@ -335,7 +335,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
               onClick={fetchReturns}
               disabled={apiLoading}
               sx={{
-                borderColor: '#D9E1FA',
+                borderColor: 'white',
                 color: '#333',
                 '&:hover': {
                   borderColor: '#B8C5F2',
@@ -402,7 +402,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
                       <Chip
                         label={`${voucher.entries} entries`}
                         size="small"
-                        sx={{ backgroundColor: "#D9E1FA", color: "#333" }}
+                        sx={{ backgroundColor: "white", color: "#333" }}
                       />
                     </Box>
 
@@ -657,7 +657,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
               disabled={currentPage === 1 || filteredVouchers.length === 0}
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               sx={{
-                borderColor: "#D9E1FA",
+                borderColor: "white",
                 color: "#333",
                 fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 minWidth: { xs: "70px", sm: "auto" },
@@ -683,7 +683,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
               sx={{
                 "& .MuiPaginationItem-root": {
                   color: "#333",
-                  borderColor: "#D9E1FA",
+                  borderColor: "white",
                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
                   minWidth: { xs: "28px", sm: "32px" },
                   height: { xs: "28px", sm: "32px" },
@@ -691,7 +691,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
                     backgroundColor: "#f5f5f5",
                   },
                   "&.Mui-selected": {
-                    backgroundColor: "#D9E1FA",
+                    backgroundColor: "white",
                     color: "#333",
                     "&:hover": {
                       backgroundColor: "#B8C5F2",
@@ -711,7 +711,7 @@ const PurchaseReturnList: React.FC<PurchaseReturnListProps> = ({
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
               sx={{
-                borderColor: "#D9E1FA",
+                borderColor: "white",
                 color: "#333",
                 fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 minWidth: { xs: "70px", sm: "auto" },
