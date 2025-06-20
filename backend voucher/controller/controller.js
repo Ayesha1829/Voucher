@@ -4,33 +4,34 @@ const stockSchema = require("../models/stock");
 const userSchema = require("../models/user");
 const accountSchema = require("../models/account");
 // Create a new gate pass
+// ...existing code...
 exports.gatePassController = async (req, res) => {
   try {
-    const { date, party, orderNumber, productName, detail, qty, unit, status } =
-      req.body;
+    const { date, party, orderNo, type, rows } = req.body;
 
-    if (
-      !date ||
-      !party ||
-      !orderNumber ||
-      !productName ||
-      !detail ||
-      !qty ||
-      !unit ||
-      !status
-    ) {
-      return res.status(400).send({ message: "All fields are required" });
+    if (!date || !party || !orderNo || !type || !Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).send({ message: "All fields are required and rows must be a non-empty array" });
+    }
+
+    // Validate each row
+    for (const row of rows) {
+      if (
+        !row.id ||
+        !row.productName ||
+        !row.detail ||
+        !row.qty ||
+        !row.unit
+      ) {
+        return res.status(400).send({ message: "Each row must have id, productName, detail, qty, and unit" });
+      }
     }
 
     const gatePass = await new gatePassSchema({
       date,
       party,
-      orderNumber,
-      productName,
-      detail,
-      qty,
-      unit,
-      status,
+      orderNo,
+      type,
+      rows,
     }).save();
 
     res.status(201).send({
@@ -47,6 +48,7 @@ exports.gatePassController = async (req, res) => {
     console.log(error);
   }
 };
+// ...existing code...
 // Create a new category
 exports.categoryController = async (req, res) => {
   try {

@@ -48,7 +48,7 @@ const theme = createTheme({
 function App() {
   // Load initial section from localStorage, default to "dashboard"
   const [currentSection, setCurrentSection] = useState<string>(() => localStorage.getItem("currentSection") || "dashboard");
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ function App() {
     if (!token) {
       console.log('❌ No token found - showing login');
       setCheckingAuth(false);
-      setIsAuthenticated(false);
+      // setIsAuthenticated(false);
       return;
     }
 
@@ -96,9 +96,9 @@ function App() {
     setCurrentSection(section);
   };
 
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-  };
+  // const handleLoginSuccess = () => {
+  //   setIsAuthenticated(true);
+  // };
 
   const renderContent = () => {
     switch (currentSection) {
@@ -187,15 +187,15 @@ function App() {
     );
   }
 
-  if (!isAuthenticated) {
-    console.log('🔐 Showing login page');
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Login onLoginSuccess={handleLoginSuccess} />
-      </ThemeProvider>
-    );
-  }
+  // if (!isAuthenticated) {
+  //   console.log('🔐 Showing login page');
+  //   return (
+  //     <ThemeProvider theme={theme}>
+  //       <CssBaseline />
+  //       <Login onLoginSuccess={handleLoginSuccess} />
+  //     </ThemeProvider>
+  //   );
+  // }
 
   console.log('✅ Showing main app');
 

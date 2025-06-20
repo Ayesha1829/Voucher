@@ -20,6 +20,8 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import { addGatePass } from "../../api/axios";
+
 
 const PRIMARY_COLOR = "#3da0bd";
 
@@ -61,7 +63,12 @@ const AddGatePass: React.FC = () => {
     setRows((prev) => prev.length > 1 ? prev.filter((row) => row.id !== id) : prev);
   };
 
-  const handleSave = () => {
+  const handleSave = async() => {
+    console.log({ date, party, orderNo, type, rows });
+    const gatepassData = { date, party, orderNo, type, rows };
+    const response=await addGatePass(gatepassData);
+    console.log(response);
+    
     // Implement save logic here
     // Example: console.log({ date, party, orderNo, type, rows });
   };

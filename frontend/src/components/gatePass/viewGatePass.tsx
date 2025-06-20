@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Paper,
@@ -27,6 +27,7 @@ import {
   Search as SearchIcon,
   NavigateNext as NavigateNextIcon,
 } from '@mui/icons-material';
+import { viewGatePass } from '../../api/axios';
 
 interface GatePassVoucher {
   id: string;
@@ -46,11 +47,16 @@ const ViewGatePass: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(50);
 
   // Sample data
-  const [voucherData] = useState<GatePassVoucher[]>([
-    { id: 'GP001', date: '01/15/2024', partyName: 'ABC Trading', status: 'Gate-In', addedBy: 'John Doe' },
-    { id: 'GP002', date: '01/16/2024', partyName: 'XYZ Corp', status: 'Gate-Out', addedBy: 'Jane Smith' },
-    { id: 'GP003', date: '01/17/2024', partyName: 'Global Ltd', status: 'Gate-In', addedBy: 'Mike Johnson' },
+  const [voucherData,setVoucherData] = useState<any>([
   ]);
+
+  const fetchGatePass=async()=>{
+    const response=await viewGatePass();
+    setVoucherData(response.data);
+  }
+  useEffect(()=>{
+    fetchGatePass();
+  },[]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);

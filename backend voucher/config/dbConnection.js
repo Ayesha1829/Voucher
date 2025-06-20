@@ -3,7 +3,7 @@ const colors = require('colors');
 
 const dbConnection = async () => {
     try {
-        const conn = await mongoose.connect(process.env.DB_URL);
+        const conn = await mongoose.connect(process.env.MONGODB_URI);
         console.log(`Database connected successfully: ${conn.connection.host}`.bgMagenta.white);
     } catch (error) {
         console.error(`Error in DB Connection: ${error.message}`.bgRed.white);

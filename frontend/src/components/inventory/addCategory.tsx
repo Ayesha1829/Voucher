@@ -13,6 +13,7 @@ import {
   Chip,
   CircularProgress
 } from '@mui/material';
+import { createcategory, showallcategory } from '../../api/axios';
 
 // Interface for Category
 interface Category {
@@ -32,34 +33,19 @@ const AddCategory: React.FC = () => {
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [fetchingCategories, setFetchingCategories] = useState<boolean>(false);
+console.log(categories);
 
-  // API base URL
-  const API_BASE_URL = 'http://localhost:5000/api';
 
   // Fetch categories from backend
   const fetchCategories = async () => {
     try {
       setFetchingCategories(true);
-      console.log('Fetching categories from:', `${API_BASE_URL}/categories`);
-
-      const response = await fetch(`${API_BASE_URL}/categories`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      console.log('Categories response status:', response.status);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Categories data:', data);
+      const response = await showallcategory();
+      const data = await response.data;
 
       if (data.success) {
         setCategories(data.data || []);
+
       } else {
         setSnackbarMessage('Failed to fetch categories: ' + (data.message || 'Unknown error'));
         setSnackbarOpen(true);
@@ -104,21 +90,9 @@ const AddCategory: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await fetch(`${API_BASE_URL}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add auth token if available
-          ...(localStorage.getItem('token') && {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          })
-        },
-        body: JSON.stringify({
-          name: categoryName.trim()
-        })
-      });
+    const response = await createcategory(categoryName);
 
-      const data = await response.json();
+      const data = await response.data;
 
       if (data.success) {
         // Add the new category to local state
