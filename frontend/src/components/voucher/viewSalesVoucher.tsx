@@ -255,11 +255,11 @@ const ViewSalesVoucher: React.FC = () => {
       {/* Header Card */}
       <Box
         sx={{
-          backgroundColor: '#0645B1',
+          backgroundColor: '#3da0bd',
           padding: '16px',
           borderRadius: '12px',
           marginBottom: '24px',
-          border: '1px solid #0645B1',
+          border: '1px solid #3da0bd',
         }}
       >
         <Typography
@@ -377,7 +377,7 @@ const ViewSalesVoucher: React.FC = () => {
           <Table>
             {/* Table Header */}
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#0645B1' }}>
+              <TableRow sx={{ backgroundColor: '#3da0bd' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                   SV ID #
                 </TableCell>
@@ -495,7 +495,7 @@ const ViewSalesVoucher: React.FC = () => {
                   backgroundColor: '#f8f9ff',
                   '&:hover': { backgroundColor: '#E3F2FD' },
                   '&.Mui-selected': {
-                    backgroundColor: '#0645B1',
+                    backgroundColor: '#3da0bd',
                     color: '#FFFFFF',
                   },
                 },

@@ -175,7 +175,7 @@ const StockSummary: React.FC<StockSummaryProps> = ({
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "white",
-            backgroundColor: "#0645B1",
+            backgroundColor: "#3da0bd",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,
@@ -331,7 +331,7 @@ const StockSummary: React.FC<StockSummaryProps> = ({
           <TableContainer component={Paper} variant="outlined" sx={{ mb: 3, borderRadius: 2, overflowX: 'auto' }}>
             <Table sx={{ minWidth: 1200 }}>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#0645B1" }}>
+                <TableRow sx={{ backgroundColor: "#3da0bd" }}>
                   <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 60 }}>ID</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 200 }}>Category</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center", minWidth: 120 }}>Total Opening Qty</TableCell>

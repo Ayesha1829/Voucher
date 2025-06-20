@@ -285,7 +285,7 @@ const SalesVoucher: React.FC = () => {
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#0645B1",
+            backgroundColor: "#3da0bd",
             color: "white",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },
@@ -344,23 +344,18 @@ const SalesVoucher: React.FC = () => {
                 getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
                 value={parties.find(party => party.name === selectedParty) || null}
                 onChange={(_, newValue) => {
-                  if (typeof newValue === 'string') {
-                    setSelectedParty(newValue);
-                  } else if (newValue) {
+                  if (newValue && typeof newValue !== 'string') {
                     setSelectedParty(newValue.name);
                   } else {
                     setSelectedParty('');
                   }
                 }}
-                inputValue={selectedParty}
-                onInputChange={(_, newInputValue) => {
-                  setSelectedParty(newInputValue);
-                }}
-                freeSolo={true}
+                // Remove inputValue and onInputChange to disable free typing
+                freeSolo={false}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    placeholder="Select or type party name"
+                    placeholder="Select party"
                     variant="outlined"
                   />
                 )}

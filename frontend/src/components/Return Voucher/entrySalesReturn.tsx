@@ -163,7 +163,7 @@ const EntrySalesReturn: React.FC = () => {
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#0645B1",
+            backgroundColor: "#3da0bd",
             color: "white",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },

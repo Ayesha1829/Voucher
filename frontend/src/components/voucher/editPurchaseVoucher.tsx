@@ -303,7 +303,7 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#0645B1",
+            backgroundColor: "#3da0bd",
             color: "white",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },
@@ -400,26 +400,27 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
                 getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
                 value={suppliers.find(supplier => supplier.name === selectedSupplier) || null}
                 onChange={(_, newValue) => {
-                  if (typeof newValue === 'string') {
-                    setSelectedSupplier(newValue);
-                  } else if (newValue) {
+                  if (newValue && typeof newValue !== 'string') {
                     setSelectedSupplier(newValue.name);
                   } else {
                     setSelectedSupplier('');
                   }
                 }}
-                inputValue={selectedSupplier}
-                onInputChange={(_, newInputValue) => {
-                  setSelectedSupplier(newInputValue);
-                }}
-                freeSolo={true}
+                // Remove inputValue and onInputChange to disable free typing
+                freeSolo={false}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    placeholder="Select or type supplier name"
+                    placeholder="Select supplier"
                     variant="outlined"
                   />
                 )}
+                filterOptions={(options, { inputValue }) => {
+                  const filtered = options.filter((option) =>
+                    option.name.toLowerCase().includes(inputValue.toLowerCase())
+                  );
+                  return filtered;
+                }}
               />
             </Box>
             <Box>
@@ -431,9 +432,15 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
                 size="small"
                 type="number"
                 value={closingBalance}
-                onChange={(e) => setClosingBalance(e.target.value)}
+                // Remove onChange to make it fixed and not editable
                 placeholder="0.00"
                 variant="outlined"
+                InputProps={{
+                  readOnly: true,
+                  sx: {
+                    backgroundColor: "#f5f5f5"
+                  }
+                }}
               />
             </Box>
           </Box>
@@ -450,7 +457,7 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#0645B1' }}>
+                  <TableRow sx={{ backgroundColor: '#3da0bd' }}>
                     <TableCell sx={{ color: 'white', fontWeight: 'bold', minWidth: 150 }}>
                       Item Name
                     </TableCell>
@@ -595,8 +602,8 @@ const EditPurchaseVoucher: React.FC<EditPurchaseVoucherProps> = ({
               startIcon={<AddIcon />}
               onClick={addNewRow}
               sx={{
-                borderColor: '#0645B1',
-                color: '#0645B1',
+                borderColor: '#3da0bd',
+                color: '#3da0bd',
                 '&:hover': {
                   borderColor: '#B575E8',
                   backgroundColor: '#f8f4ff',

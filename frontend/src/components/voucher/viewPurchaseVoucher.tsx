@@ -238,11 +238,11 @@ const ViewPurchaseVoucher: React.FC = () => {
       {/* Header Card */}
       <Box
         sx={{
-          backgroundColor: '#0645B1',
+          backgroundColor: '#3da0bd',
           padding: '16px',
           borderRadius: '12px',
           marginBottom: '24px',
-          border: '1px solid #0645B1',
+          border: '1px solid #3da0bd',
         }}
       >
         <Typography
@@ -304,10 +304,10 @@ const ViewPurchaseVoucher: React.FC = () => {
               onClick={fetchVouchers}
               disabled={loading}
               sx={{
-                borderColor: '#0645B1',
-                color: '#0645B1',
+                borderColor: '#3da0bd',
+                color: '#3da0bd',
                 '&:hover': {
-                  borderColor: '#0645B1',
+                  borderColor: '#3da0bd',
                   backgroundColor: '#f8f9ff',
                 },
               }}
@@ -360,7 +360,7 @@ const ViewPurchaseVoucher: React.FC = () => {
           <Table>
             {/* Table Header */}
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#0645B1' }}>
+              <TableRow sx={{ backgroundColor: '#3da0bd' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                   PV ID #
                 </TableCell>
@@ -478,7 +478,7 @@ const ViewPurchaseVoucher: React.FC = () => {
                   backgroundColor: '#f8f9ff',
                   '&:hover': { backgroundColor: '#E3F2FD' },
                   '&.Mui-selected': {
-                    backgroundColor: '#0645B1',
+                    backgroundColor: '#3da0bd',
                     color: '#FFFFFF',
                   },
                 },

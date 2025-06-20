@@ -177,7 +177,7 @@ const VoidSalesReturn: React.FC<VoidSalesReturnProps> = ({
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "white",
-            backgroundColor: "#0645B1",
+            backgroundColor: "#3da0bd",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
             borderRadius: 1,

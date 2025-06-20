@@ -204,7 +204,7 @@ const ViewPurchaseReturn: React.FC = () => {
       {/* Header Card */}
       <Box
         sx={{
-          backgroundColor: '#0645B1',
+          backgroundColor: '#3da0bd',
           padding: '16px',
           borderRadius: '12px',
           marginBottom: '24px',
@@ -326,7 +326,7 @@ const ViewPurchaseReturn: React.FC = () => {
           <Table>
             {/* Table Header */}
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#0645B1' }}>
+              <TableRow sx={{ backgroundColor: '#3da0bd' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                   PR ID #
                 </TableCell>

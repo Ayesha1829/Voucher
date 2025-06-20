@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
-const PRIMARY_COLOR = "#0645B1";
+const PRIMARY_COLOR = "#3da0bd";
 
 interface ProductRow {
   id: string;

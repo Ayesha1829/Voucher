@@ -252,7 +252,7 @@ const PurchaseVoucher: React.FC = () => {
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#0645B1",
+            backgroundColor: "#3da0bd",
             color: "white",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },
@@ -311,23 +311,18 @@ const PurchaseVoucher: React.FC = () => {
                 getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
                 value={suppliers.find(supplier => supplier.name === selectedSupplier) || null}
                 onChange={(_, newValue) => {
-                  if (typeof newValue === 'string') {
-                    setSelectedSupplier(newValue);
-                  } else if (newValue) {
+                  if (newValue && typeof newValue !== 'string') {
                     setSelectedSupplier(newValue.name);
                   } else {
                     setSelectedSupplier('');
                   }
                 }}
-                inputValue={selectedSupplier}
-                onInputChange={(_, newInputValue) => {
-                  setSelectedSupplier(newInputValue);
-                }}
-                freeSolo={true}
+                // Remove inputValue and onInputChange to disable free typing
+                freeSolo={false}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    placeholder="Select or type supplier name"
+                    placeholder="Select supplier"
                     variant="outlined"
                   />
                 )}

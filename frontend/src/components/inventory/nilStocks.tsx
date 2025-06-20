@@ -167,7 +167,7 @@ const NilStocks: React.FC<NilStocksProps> = ({
             mb: { xs: 2, md: 3 },
             fontWeight: "bold",
             color: "black",
-            backgroundColor: "#0645B1",
+            backgroundColor: "#3da0bd",
             color: "white",
             py: { xs: 1.5, md: 2 },
             px: { xs: 1, md: 0 },
@@ -337,7 +337,7 @@ const NilStocks: React.FC<NilStocksProps> = ({
           <TableContainer component={Paper} variant="outlined" sx={{ mb: 3, borderRadius: 2, overflowX: 'auto' }}>
             <Table sx={{ minWidth: 1200 }}>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#0645B1" }}>
+                <TableRow sx={{ backgroundColor: "#3da0bd" }}>
                   <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 60 }}>Stock ID</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 200 }}>Item</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "white", minWidth: 150 }}>Description</TableCell>

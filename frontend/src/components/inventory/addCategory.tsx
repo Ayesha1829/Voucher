@@ -179,7 +179,7 @@ const AddCategory: React.FC = () => {
               mb: { xs: 2, md: 3 },
               fontWeight: "bold",
               color: "white",
-              backgroundColor: "#0645B1",
+              backgroundColor: "#3da0bd",
               py: { xs: 1.5, md: 2 },
               borderRadius: 1,
               fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' }

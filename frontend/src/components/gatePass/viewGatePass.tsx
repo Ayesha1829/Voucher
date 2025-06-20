@@ -116,7 +116,7 @@ const ViewGatePass: React.FC = () => {
                 variant="contained"
                 onClick={handleSubmitFilter}
                 sx={{
-                  bgcolor: '#0645B1',
+                  bgcolor: '#3da0bd',
                   '&:hover': { bgcolor: '#053594' },
                   height: '40px'
                 }}
@@ -163,7 +163,7 @@ const ViewGatePass: React.FC = () => {
               <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ bgcolor: '#0645B1' }}>
+                    <TableRow sx={{ bgcolor: '#3da0bd' }}>
                       <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>GP ID #</TableCell>
                       <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Dated</TableCell>
                       <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Party Name</TableCell>

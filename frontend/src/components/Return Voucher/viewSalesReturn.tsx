@@ -357,7 +357,7 @@ const ViewSalesReturn: React.FC = () => {
           <Table>
             {/* Table Header */}
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#0645B1' }}>
+              <TableRow sx={{ backgroundColor: '#3da0bd' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                   SR ID #
                 </TableCell>
@@ -479,7 +479,7 @@ const ViewSalesReturn: React.FC = () => {
                   backgroundColor: '#f8f9ff',
                   '&:hover': { backgroundColor: '#E3F2FD' },
                   '&.Mui-selected': {
-                    backgroundColor: '#0645B1',
+                    backgroundColor: '#3da0bd',
                     color: '#FFFFFF',
                   },
                 },

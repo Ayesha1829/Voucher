@@ -239,7 +239,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
           flexDirection: { xs: 'column', sm: 'row' }
         }}>
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<EditIcon />}
             onClick={() => onEdit(voucher)}
             disabled={voucher.status === 'Voided'}
@@ -248,11 +248,38 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
               py: { xs: 1.5, md: 1 },
               fontSize: { xs: '1rem', md: '1.1rem' },
               minWidth: { xs: '200px', md: 'auto' },
+              backgroundColor: '#4caf50',
+              color: '#000',
+              '&:hover': {
+                backgroundColor: '#388e3c',
+                color: '#fff'
+              },
+              '&:disabled': {
+                backgroundColor: '#bdbdbd',
+                color: '#fff'
+              },
             }}
           >
             Edit Voucher
           </Button>
-          
+          {/* Add Return Voucher Button */}
+          <Button
+            variant="contained"
+            sx={{
+              px: { xs: 3, md: 4 },
+              py: { xs: 1.5, md: 1 },
+              fontSize: { xs: '1rem', md: '1.1rem' },
+              minWidth: { xs: '200px', md: 'auto' },
+              backgroundColor: '#1976d2',
+              color: '#000',
+              '&:hover': {
+                backgroundColor: '#115293',
+                color: '#fff'
+              }
+            }}
+          >
+            Return Voucher
+          </Button>
           <Button
             variant="contained"
             startIcon={<VoidIcon />}
@@ -268,7 +295,7 @@ const PurchaseVoucherDetail: React.FC<PurchaseVoucherDetailProps> = ({
                 backgroundColor: '#d32f2f',
               },
               '&:disabled': {
-                backgroundColor: '#cccccc',
+                backgroundColor: '#cccccblac',
               },
             }}
           >

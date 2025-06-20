@@ -83,10 +83,10 @@ const ScrollableMenuContainer = styled(Box)(() => ({
     borderRadius: "3px",
   },
   "&::-webkit-scrollbar-thumb": {
-    backgroundColor: "#0645B1",
+    backgroundColor: "#3da0bd",
     borderRadius: "3px",
     "&:hover": {
-      backgroundColor: "#0645B1",
+      backgroundColor: "#3da0bd",
     },
   },
 }));

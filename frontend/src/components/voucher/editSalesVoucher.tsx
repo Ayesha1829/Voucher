@@ -304,7 +304,7 @@ const EditSalesVoucher: React.FC<EditSalesVoucherProps> = ({
         {/* Header */}
         <Box
           sx={{
-            backgroundColor: "#0645B1",
+            backgroundColor: "#3da0bd",
             color: "black",
             py: { xs: 1.5, md: 2 },
             px: { xs: 2, md: 3 },
@@ -450,7 +450,7 @@ const EditSalesVoucher: React.FC<EditSalesVoucherProps> = ({
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#0645B1' }}>
+                  <TableRow sx={{ backgroundColor: '#3da0bd' }}>
                     <TableCell sx={{ color: 'white', fontWeight: 'bold', minWidth: 150 }}>
                       Item Name
                     </TableCell>
@@ -595,8 +595,8 @@ const EditSalesVoucher: React.FC<EditSalesVoucherProps> = ({
               startIcon={<AddIcon />}
               onClick={addNewRow}
               sx={{
-                borderColor: '#0645B1',
-                color: '#0645B1',
+                borderColor: '#3da0bd',
+                color: '#3da0bd',
                 '&:hover': {
                   borderColor: '#B575E8',
                   backgroundColor: '#f8f4ff',
